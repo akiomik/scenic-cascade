@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require_relative "dependencies/version"
+require_relative 'dependencies/version'
 
 module Scenic
   module Dependencies
