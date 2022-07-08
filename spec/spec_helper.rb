@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
+require 'active_record'
+require 'scenic'
+
 require 'scenic/dependencies'
 
 RSpec.configure do |config|
