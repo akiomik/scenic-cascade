@@ -34,6 +34,10 @@ GEM
     builder (3.2.4)
     concurrent-ruby (1.1.10)
     crass (1.0.6)
+    database_cleaner-active_record (2.0.1)
+      activerecord (>= 5.a)
+      database_cleaner-core (~> 2.0.0)
+    database_cleaner-core (2.0.1)
     diff-lcs (1.5.0)
     erubi (1.10.0)
     i18n (1.10.0)
@@ -119,6 +123,7 @@ PLATFORMS
   x86_64-linux
 
 DEPENDENCIES
+  database_cleaner-active_record (~> 2.0)
   pg (~> 1.0)
   rake (~> 13.0)
   rspec (~> 3.0)

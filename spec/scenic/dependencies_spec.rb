@@ -1,16 +1,6 @@
 # frozen_string_literal: true
 
 RSpec.describe Scenic::Dependencies do
-  before do
-    ActiveRecord::Base.establish_connection(
-      adapter: 'postgresql',
-      host: 'localhost',
-      username: ENV.fetch('POSTGRES_USER'),
-      password: ENV.fetch('POSTGRES_PASSWORD'),
-      database: ENV.fetch('POSTGRES_DB')
-    )
-  end
-
   it 'has a version number' do
     expect(Scenic::Dependencies::VERSION).not_to be_nil
   end
