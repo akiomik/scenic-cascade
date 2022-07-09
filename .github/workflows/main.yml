@@ -44,3 +44,5 @@ jobs:
         POSTGRES_DB: testdb
         POSTGRES_USER: user
         POSTGRES_PASSWORD: password
+    - name: Run steep
+      run: bundle exec steep check --severity-level=error
