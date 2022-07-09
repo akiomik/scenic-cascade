@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
-RSpec.describe Scenic::Dependencies::ReverseDependencyFinder do
-  describe '.reverse_dependent_views_of' do
-    subject { Scenic::Dependencies.reverse_dependent_views_of(name, recursive: recursive) }
+RSpec.describe Scenic::Dependencies::DependantFinder do
+  describe '.view_dependants_of' do
+    subject { Scenic::Dependencies.view_dependants_of(name, recursive: recursive) }
 
     let(:recursive) { false }
     let(:adapter) { Scenic::Adapters::Postgres.new }
@@ -28,55 +28,55 @@ RSpec.describe Scenic::Dependencies::ReverseDependencyFinder do
       it { is_expected.to eq [] }
     end
 
-    context 'when the target view has no reverse dependencies' do
+    context 'when the target view has no dependants' do
       let(:name) { 'view3' }
 
       it { is_expected.to eq [] }
     end
 
-    context 'when the target view has reverse dependencies' do
+    context 'when the target view has dependants' do
       let(:name) { 'view2' }
 
       let(:expected) do
         [{
-          'dependee' => 'view2',
-          'depender' => 'view3'
+          'to' => 'view2',
+          'from' => 'view3'
         }]
       end
 
       it { is_expected.to eq expected }
     end
 
-    context 'when the target view has nested reverse dependencies and recursive is false' do
+    context 'when the target view has nested dependants and recursive is false' do
       let(:name) { 'view1' }
 
       let(:expected) do
         [{
-          'dependee' => 'view1',
-          'depender' => 'view2'
+          'to' => 'view1',
+          'from' => 'view2'
         }, {
-          'dependee' => 'view1',
-          'depender' => 'view3'
+          'to' => 'view1',
+          'from' => 'view3'
         }]
       end
 
       it { is_expected.to eq expected }
     end
 
-    context 'when the target view has nested reverse dependencies and recursive is true' do
+    context 'when the target view has nested dependants and recursive is true' do
       let(:name) { 'view1' }
       let(:recursive) { true }
 
       let(:expected) do
         [{
-          'dependee' => 'view1',
-          'depender' => 'view2'
+          'to' => 'view1',
+          'from' => 'view2'
         }, {
-          'dependee' => 'view2',
-          'depender' => 'view3'
+          'to' => 'view2',
+          'from' => 'view3'
         }, {
-          'dependee' => 'view1',
-          'depender' => 'view3'
+          'to' => 'view1',
+          'from' => 'view3'
         }]
       end
 

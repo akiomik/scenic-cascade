@@ -2,18 +2,18 @@
 
 module Scenic
   module Dependencies
-    # Finds reverse dependencies of database views
-    module ReverseDependencyFinder
+    # Finds database views that depend on the specified view
+    module DependantFinder
       def self.included(klass)
         klass.extend(ClassMethods)
       end
 
-      # Class methods of ReverseDependencyFinder
+      # Class methods of DependantFinder
       module ClassMethods
-        REVERSE_DEPENDENCY_SQL = <<-SQL
+        DEPENDANT_SQL = <<-SQL
              SELECT DISTINCT
-                    dependee.relname as dependee
-                  , depender.relname as depender
+                    dependee.relname as to
+                  , depender.relname as from
                FROM pg_depend d
                JOIN pg_rewrite r
                  ON d.objid = r.oid
@@ -27,17 +27,17 @@ module Scenic
            ORDER BY depender.relname;
         SQL
 
-        private_constant :REVERSE_DEPENDENCY_SQL
+        private_constant :DEPENDANT_SQL
 
-        def reverse_dependent_views_of(view_name, recursive: false)
-          query = ActiveRecord::Base.sanitize_sql_array([REVERSE_DEPENDENCY_SQL, view_name])
+        def view_dependants_of(view_name, recursive: false)
+          query = ActiveRecord::Base.sanitize_sql_array([DEPENDANT_SQL, view_name])
           dependencies = ActiveRecord::Base.connection.select_all(query).to_a
 
           return [] if dependencies.empty?
           return dependencies unless recursive
 
           dependencies.flat_map do |dependency|
-            [dependency, *reverse_dependent_views_of(dependency['depender'])]
+            [dependency, *view_dependants_of(dependency['from'])]
           end
         end
       end
