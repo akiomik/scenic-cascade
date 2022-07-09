@@ -7,6 +7,8 @@ gemspec
 
 gem 'rake', '~> 13.0'
 
+gem 'steep'
+
 gem 'database_cleaner-active_record', '~> 2.0'
 gem 'pg', '~> 1.0'
 gem 'rspec', '~> 3.0'
