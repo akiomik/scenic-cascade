@@ -1,6 +1,8 @@
 module Scenic
   module Dependencies
     VERSION: String
-    # See the writing guide of rbs: https://github.com/ruby/rbs#guides
+
+    def self.view_dependants_of: (String, ?recursive: bool) -> Array[{ from: String, to: String }]
+    alias self.view_dependents_of self.view_dependants_of
   end
 end

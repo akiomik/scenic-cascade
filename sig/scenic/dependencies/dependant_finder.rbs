@@ -1,0 +1,12 @@
+module Scenic
+  module Dependencies
+    module DependantFinder
+      module ClassMethods
+        DEPENDANT_SQL: String
+
+        def view_dependants_of: (String, ?recursive: bool) -> Array[{ from: String, to: String }]
+        alias view_dependents_of view_dependants_of
+      end
+    end
+  end
+end
