@@ -2,7 +2,7 @@ module Scenic
   module Dependencies
     VERSION: String
 
-    def self.view_dependants_of: (String, ?recursive: bool) -> Array[{ from: String, to: String }]
+    def self.view_dependants_of: (String, ?recursive: bool) -> Array[Dependency]
     alias self.view_dependents_of self.view_dependants_of
   end
 end

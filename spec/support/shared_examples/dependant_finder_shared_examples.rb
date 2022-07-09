@@ -22,42 +22,34 @@ shared_examples 'a dependant finder' do
   context 'when the target view does not exist' do
     let(:name) { 'view0' }
 
-    it { is_expected.to eq [] }
+    it { is_expected.to match [] }
   end
 
   context 'when the target view has no dependants' do
     let(:name) { 'view3' }
 
-    it { is_expected.to eq [] }
+    it { is_expected.to match [] }
   end
 
   context 'when the target view has dependants' do
     let(:name) { 'view2' }
 
-    let(:expected) do
-      [{
-        'to' => 'view2',
-        'from' => 'view3'
-      }]
-    end
+    let(:expected) { [Scenic::Dependencies::Dependency.new(from: 'view3', to: 'view2')] }
 
-    it { is_expected.to eq expected }
+    it { is_expected.to match expected }
   end
 
   context 'when the target view has nested dependants and recursive is false' do
     let(:name) { 'view1' }
 
     let(:expected) do
-      [{
-        'to' => 'view1',
-        'from' => 'view2'
-      }, {
-        'to' => 'view1',
-        'from' => 'view3'
-      }]
+      [
+        Scenic::Dependencies::Dependency.new(from: 'view2', to: 'view1'),
+        Scenic::Dependencies::Dependency.new(from: 'view3', to: 'view1')
+      ]
     end
 
-    it { is_expected.to eq expected }
+    it { is_expected.to match expected }
   end
 
   context 'when the target view has nested dependants and recursive is true' do
@@ -65,18 +57,13 @@ shared_examples 'a dependant finder' do
     let(:recursive) { true }
 
     let(:expected) do
-      [{
-        'to' => 'view1',
-        'from' => 'view2'
-      }, {
-        'to' => 'view2',
-        'from' => 'view3'
-      }, {
-        'to' => 'view1',
-        'from' => 'view3'
-      }]
+      [
+        Scenic::Dependencies::Dependency.new(from: 'view2', to: 'view1'),
+        Scenic::Dependencies::Dependency.new(from: 'view3', to: 'view2'),
+        Scenic::Dependencies::Dependency.new(from: 'view3', to: 'view1')
+      ]
     end
 
-    it { is_expected.to eq expected }
+    it { is_expected.to match expected }
   end
 end

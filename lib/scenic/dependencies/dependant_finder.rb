@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require_relative 'dependency'
+
 module Scenic
   module Dependencies
     # Finds database views that depend on the specified view
@@ -31,13 +33,14 @@ module Scenic
 
         def view_dependants_of(view_name, recursive: false)
           query = ActiveRecord::Base.sanitize_sql_array([DEPENDANT_SQL, view_name])
-          dependencies = ActiveRecord::Base.connection.select_all(query).to_a
+          raw_dependencies = ActiveRecord::Base.connection.select_all(query).to_a
+          dependencies = Scenic::Dependencies::Dependency.from_hash_list(raw_dependencies)
 
           return [] if dependencies.empty?
           return dependencies unless recursive
 
           dependencies.flat_map do |dependency|
-            [dependency, *view_dependants_of(dependency['from'])]
+            [dependency, *view_dependants_of(dependency.from)]
           end
         end
 
