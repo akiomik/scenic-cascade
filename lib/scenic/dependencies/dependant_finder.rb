@@ -40,6 +40,8 @@ module Scenic
             [dependency, *view_dependants_of(dependency['from'])]
           end
         end
+
+        alias view_dependents_of view_dependants_of
       end
     end
   end

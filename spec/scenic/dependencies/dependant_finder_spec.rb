@@ -1,9 +1,7 @@
 # frozen_string_literal: true
 
 RSpec.describe Scenic::Dependencies::DependantFinder do
-  describe '.view_dependants_of' do
-    subject { Scenic::Dependencies.view_dependants_of(name, recursive: recursive) }
-
+  shared_examples 'a dependant finder' do
     let(:recursive) { false }
     let(:adapter) { Scenic::Adapters::Postgres.new }
 
@@ -82,5 +80,17 @@ RSpec.describe Scenic::Dependencies::DependantFinder do
 
       it { is_expected.to eq expected }
     end
+  end
+
+  describe '.view_dependants_of' do
+    subject { Scenic::Dependencies.view_dependants_of(name, recursive: recursive) }
+
+    include_examples 'a dependant finder'
+  end
+
+  describe '.view_dependents_of' do
+    subject { Scenic::Dependencies.view_dependents_of(name, recursive: recursive) }
+
+    include_examples 'a dependant finder'
   end
 end
