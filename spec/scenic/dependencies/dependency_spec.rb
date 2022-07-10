@@ -9,7 +9,7 @@ class DependencyLike
   end
 end
 
-RSpec.describe Scenic::Dependencies::Dependency do
+RSpec.describe Scenic::Dependencies::Dependency, size: :small do
   describe '#==' do
     subject { this == that }
 

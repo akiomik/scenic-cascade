@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-RSpec.describe Scenic::Dependencies::DependantFinder do
+RSpec.describe Scenic::Dependencies::DependantFinder, size: :medium do
   describe '.view_dependants_of' do
     subject { Scenic::Dependencies.view_dependants_of(name, recursive: recursive) }
 

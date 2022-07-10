@@ -19,7 +19,7 @@ RSpec.configure do |config|
     c.syntax = :expect
   end
 
-  config.before(:suite) do
+  config.before(:all, size: ->(size) { size != :small }) do
     ActiveRecord::Base.establish_connection(
       adapter: 'postgresql',
       host: 'localhost',
@@ -32,7 +32,7 @@ RSpec.configure do |config|
     DatabaseCleaner.clean_with(:truncation)
   end
 
-  config.around do |example|
+  config.around(:example, size: ->(size) { size != :small }) do |example|
     DatabaseCleaner.cleaning do
       example.run
     end
