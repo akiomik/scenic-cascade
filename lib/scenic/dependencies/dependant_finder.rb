@@ -10,7 +10,7 @@ module Scenic
         klass.extend(ClassMethods)
       end
 
-      # Class methods of DependantFinder
+      # Provides class methods to injected class
       module ClassMethods
         DEPENDANT_SQL = <<-SQL
              SELECT DISTINCT
