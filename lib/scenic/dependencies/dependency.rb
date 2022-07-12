@@ -15,6 +15,13 @@ module Scenic
         @from == other.from && @to == other.to
       end
 
+      # mermaid-like syntax
+      def to_s
+        "#{@from} --> #{@to}"
+      end
+
+      alias inspect to_s
+
       def self.from_hash_list(hash_list)
         hash_list.map { |h| new(from: h['from'], to: h['to']) }
       end

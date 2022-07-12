@@ -7,6 +7,9 @@ module Scenic
       def initialize: (from: String, to: String) -> void
 
       def self.from_hash_list: (Array[{ 'from' => String, 'to' => String }]) -> Array[Dependency]
+
+      def to_s: -> String
+      def inspect: -> String
     end
   end
 end
