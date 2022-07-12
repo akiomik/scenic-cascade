@@ -24,8 +24,8 @@ module Scenic
 
       alias inspect to_s
 
-      def self.from_hash_list(hash_list)
-        hash_list.map { |h| new(from: h['from'], to: h['to']) }
+      def self.from_hash(hash)
+        new(from: hash['from'], to: hash['to'])
       end
     end
   end

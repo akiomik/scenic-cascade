@@ -65,38 +65,13 @@ RSpec.describe Scenic::Dependencies::Dependency, size: :small do
     end
   end
 
-  describe '.from_hash_list' do
-    subject { described_class.from_hash_list(hash_list) }
+  describe '.from_hash' do
+    subject { described_class.from_hash(hash) }
 
-    context 'when hash_list is empty' do
-      let(:hash_list) { [] }
+    let(:hash) { { 'from' => 'view2', 'to' => 'view1' } }
+    let(:expected) { described_class.new(from: 'view2', to: 'view1') }
 
-      it { is_expected.to match [] }
-    end
-
-    context 'when hash_list is not empty' do
-      let(:hash_list) do
-        [{
-          'from' => 'view2',
-          'to' => 'view1'
-        }, {
-          'from' => 'view3',
-          'to' => 'view2'
-        }, {
-          'from' => 'view3',
-          'to' => 'view1'
-        }]
-      end
-
-      let(:expected) do
-        [
-          described_class.new(from: 'view2', to: 'view1'),
-          described_class.new(from: 'view3', to: 'view2'),
-          described_class.new(from: 'view3', to: 'view1')
-        ]
-      end
-
-      it { is_expected.to match expected }
-    end
+    it { is_expected.to eq expected }
+    it { is_expected.to be_a described_class }
   end
 end

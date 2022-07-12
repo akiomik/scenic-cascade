@@ -34,7 +34,7 @@ module Scenic
         def view_dependencies_of(view_name, recursive: false)
           query = ActiveRecord::Base.sanitize_sql_array([DEPENDENCY_SQL, view_name])
           raw_dependencies = ActiveRecord::Base.connection.select_all(query).to_a
-          dependencies = Scenic::Dependencies::Dependency.from_hash_list(raw_dependencies)
+          dependencies = raw_dependencies.map { |dep| Scenic::Dependencies::Dependency.from_hash(dep) }
 
           return [] if dependencies.empty?
           return dependencies unless recursive
