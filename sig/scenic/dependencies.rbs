@@ -2,8 +2,8 @@ module Scenic
   module Dependencies
     VERSION: String
 
-    def self.view_dependants_of: (String, ?recursive: bool) -> Array[Dependency]
-    alias self.view_dependents_of self.view_dependants_of
+    def self.view_dependents_of: (String, ?recursive: bool) -> Array[Dependency]
+    alias self.view_dependants_of self.view_dependents_of
 
     def self.view_dependencies_of: (String, ?recursive: bool) -> Array[Dependency]
   end

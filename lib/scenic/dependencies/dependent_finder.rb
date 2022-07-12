@@ -5,7 +5,7 @@ require_relative 'dependency'
 module Scenic
   module Dependencies
     # Finds database views that depend on the specified view
-    module DependantFinder
+    module DependentFinder
       def self.included(klass)
         klass.extend(ClassMethods)
       end
@@ -31,7 +31,7 @@ module Scenic
 
         private_constant :DEPENDANT_SQL
 
-        def view_dependants_of(view_name, recursive: false)
+        def view_dependents_of(view_name, recursive: false)
           query = ActiveRecord::Base.sanitize_sql_array([DEPENDANT_SQL, view_name])
           raw_dependencies = ActiveRecord::Base.connection.select_all(query).to_a
           dependencies = raw_dependencies.map { |dep| Scenic::Dependencies::Dependency.from_hash(dep) }
@@ -40,11 +40,11 @@ module Scenic
           return dependencies unless recursive
 
           dependencies.flat_map do |dependency|
-            [dependency, *view_dependants_of(dependency.from)]
+            [dependency, *view_dependents_of(dependency.from)]
           end
         end
 
-        alias view_dependents_of view_dependants_of
+        alias view_dependants_of view_dependents_of
       end
     end
   end

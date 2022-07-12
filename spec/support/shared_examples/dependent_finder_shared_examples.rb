@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-shared_examples 'a dependant finder' do
+shared_examples 'a dependent finder' do
   let(:recursive) { false }
   let(:adapter) { Scenic::Adapters::Postgres.new }
 
@@ -25,13 +25,13 @@ shared_examples 'a dependant finder' do
     it { is_expected.to match [] }
   end
 
-  context 'when the target view has no dependants' do
+  context 'when the target view has no dependents' do
     let(:name) { 'view3' }
 
     it { is_expected.to match [] }
   end
 
-  context 'when the target view has dependants' do
+  context 'when the target view has dependents' do
     let(:name) { 'view2' }
 
     let(:expected) { [Scenic::Dependencies::Dependency.new(from: 'view3', to: 'view2')] }
@@ -39,7 +39,7 @@ shared_examples 'a dependant finder' do
     it { is_expected.to match expected }
   end
 
-  context 'when the target view has nested dependants and recursive is false' do
+  context 'when the target view has nested dependents and recursive is false' do
     let(:name) { 'view1' }
 
     let(:expected) do
@@ -52,7 +52,7 @@ shared_examples 'a dependant finder' do
     it { is_expected.to match expected }
   end
 
-  context 'when the target view has nested dependants and recursive is true' do
+  context 'when the target view has nested dependents and recursive is true' do
     let(:name) { 'view1' }
     let(:recursive) { true }
 
