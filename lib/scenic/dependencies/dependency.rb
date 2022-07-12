@@ -7,6 +7,8 @@ module Scenic
       attr_reader :from, :to
 
       def initialize(from:, to:)
+        raise TypeError if from.nil? || to.nil?
+
         @from = from
         @to = to
       end

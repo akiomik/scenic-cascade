@@ -10,6 +10,25 @@ class DependencyLike
 end
 
 RSpec.describe Scenic::Dependencies::Dependency, size: :small do
+  describe '.new' do
+    subject(:new) { described_class.new(from: from, to: to) }
+
+    context 'when parameters is valid' do
+      let(:from) { 'view1' }
+      let(:to) { 'view2' }
+
+      it { expect { new }.not_to raise_error }
+      it { is_expected.to have_attributes(from: from, to: to) }
+    end
+
+    context 'when nil is included in parameters' do
+      let(:from) { nil }
+      let(:to) { 'view2' }
+
+      it { expect { new }.to raise_error TypeError }
+    end
+  end
+
   describe '#==' do
     subject { this == that }
 
