@@ -13,9 +13,16 @@ module Scenic
 
       # Provides class methods to injected class
       module ClassMethods
+        def find_definitions_of(view_name)
+          go(view_name, 1)
+        end
+
         def find_latest_definition_of(view_name)
-          definition = go(view_name, 0)
-          return definition unless definition.version == '00'
+          latest_definition = find_definitions_of(view_name).last
+          unless latest_definition.nil?
+            # @type var latest_definition: Scenic::Definition
+            return latest_definition
+          end
 
           raise ArgumentError, "View #{view_name} does not exist"
         end
@@ -23,10 +30,10 @@ module Scenic
         private
 
         def go(view_name, version)
-          next_definition = Scenic::Definition.new(view_name, version + 1)
-          return Scenic::Definition.new(view_name, version) unless File.exist?(next_definition.full_path)
+          definition = Scenic::Definition.new(view_name, version)
+          return [] unless File.exist?(definition.full_path)
 
-          go(view_name, version + 1)
+          [definition, *go(view_name, version + 1)]
         end
       end
     end

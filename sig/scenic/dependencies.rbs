@@ -2,6 +2,7 @@ module Scenic
   module Dependencies
     VERSION: String
 
+    def self.find_definitions_of: (String) -> Scenic::Definition
     def self.find_latest_definition_of: (String) -> Scenic::Definition
 
     def self.view_dependents_of: (String, ?recursive: bool) -> Array[Dependency]

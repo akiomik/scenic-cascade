@@ -2,11 +2,12 @@ module Scenic
   module Dependencies
     module DefinitionFinder
       module ClassMethods
+        def find_definitions_of: (String) -> Array[Scenic::Definition]
         def find_latest_definition_of: (String) -> Scenic::Definition
 
         private
 
-        def go: (String, Integer) -> Scenic::Definition
+        def go: (String, Integer) -> Array[Scenic::Definition]
       end
     end
   end

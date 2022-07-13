@@ -12,7 +12,7 @@ module Scenic
   # Visualize database view dependencies for Scenic
   module Dependencies
     include Scenic::Dependencies::DefinitionFinder
-    include Scenic::Dependencies::DependentFinder
+    include Scenic::Dependencies::DependencyFinder
     include Scenic::Dependencies::DependentFinder
   end
 end
