@@ -1,0 +1,13 @@
+module Scenic
+  module Dependencies
+    module DefinitionFinder
+      module ClassMethods
+        def find_latest_definition_of: (String) -> Scenic::Definition
+
+        private
+
+        def go: (String, Integer) -> Scenic::Definition
+      end
+    end
+  end
+end

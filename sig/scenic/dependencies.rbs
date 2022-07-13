@@ -2,6 +2,8 @@ module Scenic
   module Dependencies
     VERSION: String
 
+    def self.find_latest_definition_of: (String) -> Scenic::Definition
+
     def self.view_dependents_of: (String, ?recursive: bool) -> Array[Dependency]
     alias self.view_dependants_of self.view_dependents_of
 

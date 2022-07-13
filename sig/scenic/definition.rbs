@@ -1,0 +1,9 @@
+module Scenic
+  module Definition
+    def self.new: (String, Integer) -> Scenic::Definition
+
+    def full_path: -> String
+
+    def version: -> String
+  end
+end
