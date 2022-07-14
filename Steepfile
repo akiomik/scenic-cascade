@@ -11,6 +11,7 @@ target :lib do
   # library "logger"
   # library "monitor"
   # library "mutex_m"
+  library 'pathname'
   # library "singleton"
   #
   # # activerecord libraries

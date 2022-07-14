@@ -2,7 +2,7 @@ module Scenic
   module Definition
     def self.new: (String, Integer) -> Scenic::Definition
 
-    def full_path: -> String
+    def full_path: -> Pathname
 
     def version: -> String
   end

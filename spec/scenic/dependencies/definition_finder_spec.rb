@@ -1,26 +1,13 @@
 # frozen_string_literal: true
 
-class RailsRootMock
-  attr_reader :root
-
-  def initialize(root)
-    @root = root
-  end
-
-  def join(*paths)
-    [root, *paths].join('/')
-  end
-end
-
 RSpec.describe Scenic::Dependencies::DefinitionFinder, size: :small do
   describe '.find_definitions_of' do
     subject(:actual) { Scenic::Dependencies.find_definitions_of(name) }
 
     let(:name) { 'searches' }
-    let(:root) { '.' }
-    let(:root_mock) { RailsRootMock.new(root) }
+    let(:root) { 'testapp' }
 
-    before { allow(Rails).to receive(:root).and_return(root_mock) }
+    before { allow(Rails).to receive(:root).and_return(Pathname.new(root)) }
 
     context 'when a definition does not exist' do
       it { is_expected.to eq [] }
@@ -28,7 +15,7 @@ RSpec.describe Scenic::Dependencies::DefinitionFinder, size: :small do
 
     context 'when a definition exists' do
       let(:version) { 7 }
-      let(:expected) { (1..version).map { |i| "#{root}/db/views/#{name}_v0#{i}.sql" } }
+      let(:expected) { (1..version).map { |i| Pathname.new("#{root}/db/views/#{name}_v0#{i}.sql") } }
 
       before { allow(File).to receive(:exist?).and_return(*[true] * version, false) }
 
@@ -40,10 +27,9 @@ RSpec.describe Scenic::Dependencies::DefinitionFinder, size: :small do
     subject(:actual) { Scenic::Dependencies.find_latest_definition_of(name) }
 
     let(:name) { 'searches' }
-    let(:root) { '.' }
-    let(:root_mock) { RailsRootMock.new(root) }
+    let(:root) { 'testapp' }
 
-    before { allow(Rails).to receive(:root).and_return(root_mock) }
+    before { allow(Rails).to receive(:root).and_return(Pathname.new(root)) }
 
     context 'when a definition does not exist' do
       it { expect { actual }.to raise_error ArgumentError }
@@ -54,7 +40,7 @@ RSpec.describe Scenic::Dependencies::DefinitionFinder, size: :small do
 
       before { allow(File).to receive(:exist?).and_return(*[true] * version, false) }
 
-      it { expect(actual.full_path).to eq "#{root}/db/views/#{name}_v0#{version}.sql" }
+      it { expect(actual.full_path).to eq Pathname.new("#{root}/db/views/#{name}_v0#{version}.sql") }
     end
   end
 end
