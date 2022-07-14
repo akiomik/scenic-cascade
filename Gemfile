@@ -13,6 +13,7 @@ gem 'ammeter', '~> 1.1'
 gem 'database_cleaner-active_record', '~> 2.0'
 gem 'pg', '~> 1.0'
 gem 'rspec', '~> 3.0'
+gem 'sqlite3', '~> 1.4'
 
 gem 'rubocop', '~> 1.21', require: false
 gem 'rubocop-performance', '~> 1.14', require: false
