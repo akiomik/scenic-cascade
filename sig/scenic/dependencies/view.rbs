@@ -1,0 +1,21 @@
+module Scenic
+  module Dependencies
+    interface _ViewLike
+      def name: -> String
+      def materialized?: -> bool
+    end
+
+    class View
+      attr_reader name: String
+
+      def initialize: (name: String, materialized: bool) -> void
+
+      def materialized?: -> bool
+
+      def ==: (_ViewLike) -> bool
+
+      def to_s: -> String
+      def inspect: -> String
+    end
+  end
+end
