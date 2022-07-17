@@ -1,15 +1,22 @@
 module Scenic
   module Dependencies
-    class Dependency
-      attr_reader from: String
-      attr_reader to: String
+    interface _DependencyLike
+      def from: -> Scenic::Dependencies::View
+      def to: -> Scenic::Dependencies::View
+    end
 
-      def initialize: (from: String, to: String) -> void
+    class Dependency
+      attr_reader from: Scenic::Dependencies::View
+      attr_reader to: Scenic::Dependencies::View
+
+      def initialize: (from: Scenic::Dependencies::View, to: Scenic::Dependencies::View) -> void
+
+      def ==: (_DependencyLike) -> bool
 
       def to_s: -> String
       def inspect: -> String
 
-      def self.from_hash: ({ 'from' => String, 'to' => String }) -> Dependency
+      def self.from_hash: ({ 'from' => String, 'from_materialized' => bool, 'to' => String, 'to_materialized' => bool }) -> Dependency
     end
   end
 end

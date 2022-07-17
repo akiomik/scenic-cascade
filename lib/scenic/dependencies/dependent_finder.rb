@@ -14,8 +14,10 @@ module Scenic
       module ClassMethods
         DEPENDANT_SQL = <<-SQL
              SELECT DISTINCT
-                    dependee.relname as to
-                  , depender.relname as from
+                    dependee.relname AS to
+                  , dependee.relkind = 'm' AS to_materialized
+                  , depender.relname AS from
+                  , depender.relkind = 'm' AS from_materialized
                FROM pg_depend d
                JOIN pg_rewrite r
                  ON d.objid = r.oid
@@ -40,7 +42,7 @@ module Scenic
           return dependencies unless recursive
 
           dependencies.flat_map do |dependency|
-            [dependency, *view_dependents_of(dependency.from)]
+            [dependency, *view_dependents_of(dependency.from.name)]
           end
         end
 

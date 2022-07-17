@@ -2,10 +2,13 @@
 
 shared_examples 'a dependent finder' do
   let(:recursive) { false }
-  let(:adapter) { Scenic::Adapters::Postgres.new }
+  let(:view1) { Scenic::Dependencies::View.new(name: 'view1', materialized: false) }
+  let(:view2) { Scenic::Dependencies::View.new(name: 'view2', materialized: true) }
+  let(:view3) { Scenic::Dependencies::View.new(name: 'view3', materialized: false) }
 
   before do
-    adapter.create_materialized_view(
+    adapter = Scenic::Adapters::Postgres.new
+    adapter.create_view(
       'view1',
       "SELECT 'foo' AS bar"
     )
@@ -13,7 +16,7 @@ shared_examples 'a dependent finder' do
       'view2',
       'SELECT * FROM view1'
     )
-    adapter.create_materialized_view(
+    adapter.create_view(
       'view3',
       'SELECT * FROM view1 UNION SELECT * FROM view2'
     )
@@ -34,9 +37,7 @@ shared_examples 'a dependent finder' do
   context 'when the target view has dependents' do
     let(:name) { 'view2' }
 
-    let(:expected) { [Scenic::Dependencies::Dependency.new(from: 'view3', to: 'view2')] }
-
-    it { is_expected.to match expected }
+    it { is_expected.to match [Scenic::Dependencies::Dependency.new(from: view3, to: view2)] }
   end
 
   context 'when the target view has nested dependents and recursive is false' do
@@ -44,8 +45,8 @@ shared_examples 'a dependent finder' do
 
     let(:expected) do
       [
-        Scenic::Dependencies::Dependency.new(from: 'view2', to: 'view1'),
-        Scenic::Dependencies::Dependency.new(from: 'view3', to: 'view1')
+        Scenic::Dependencies::Dependency.new(from: view2, to: view1),
+        Scenic::Dependencies::Dependency.new(from: view3, to: view1)
       ]
     end
 
@@ -58,9 +59,9 @@ shared_examples 'a dependent finder' do
 
     let(:expected) do
       [
-        Scenic::Dependencies::Dependency.new(from: 'view2', to: 'view1'),
-        Scenic::Dependencies::Dependency.new(from: 'view3', to: 'view2'),
-        Scenic::Dependencies::Dependency.new(from: 'view3', to: 'view1')
+        Scenic::Dependencies::Dependency.new(from: view2, to: view1),
+        Scenic::Dependencies::Dependency.new(from: view3, to: view2),
+        Scenic::Dependencies::Dependency.new(from: view3, to: view1)
       ]
     end
 
