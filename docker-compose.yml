@@ -1,0 +1,16 @@
+version: '3.9'
+services:
+  lib:
+    build: .
+    volumes:
+      - .:/scenic-dependencies
+    env_file:
+      .env
+    links:
+      - postgres
+  postgres:
+    image: postgres:14-alpine
+    env_file:
+      .env
+    ports:
+      - 5432:5432

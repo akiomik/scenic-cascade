@@ -1,0 +1,5 @@
+/.github/
+/.rspec_status
+/.ruby-version
+log/
+tmp/

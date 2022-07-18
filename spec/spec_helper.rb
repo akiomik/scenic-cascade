@@ -22,7 +22,7 @@ RSpec.configure do |config|
   config.before(:all, size: ->(size) { size != :small }) do
     ActiveRecord::Base.establish_connection(
       adapter: 'postgresql',
-      host: 'localhost',
+      host: ENV.fetch('POSTGRES_HOST'),
       username: ENV.fetch('POSTGRES_USER'),
       password: ENV.fetch('POSTGRES_PASSWORD'),
       database: ENV.fetch('POSTGRES_DB')
