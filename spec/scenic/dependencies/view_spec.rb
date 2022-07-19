@@ -40,6 +40,24 @@ RSpec.describe Scenic::Dependencies::View, size: :small do
     end
   end
 
+  describe '#formatted_name' do
+    subject { view.formatted_name }
+
+    let(:view) { described_class.new(name: name, materialized: true) }
+
+    context 'when "." is included in name' do
+      let(:name) { 'database.view' }
+
+      it { is_expected.to eq '"database.view"' }
+    end
+
+    context 'when "." is not included in name' do
+      let(:name) { 'view' }
+
+      it { is_expected.to eq ':view' }
+    end
+  end
+
   describe '#==' do
     subject { this == that }
 

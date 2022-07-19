@@ -18,6 +18,10 @@ module Scenic
         @materialized
       end
 
+      def formatted_name
+        name.include?('.') ? %("#{name}") : ":#{name}"
+      end
+
       def ==(other)
         name == other.name && materialized? == other.materialized?
       end
