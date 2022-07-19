@@ -1,0 +1,15 @@
+Description:
+    Create a database view migration with re-creating of dependent views.
+
+Example:
+    bin/rails generate scenic:view:cascade searches
+
+    This will create:
+      db/views/searches_v01.sql
+      db/migrate/20220714233704_create_searches.rb
+
+    bin/rails generate scenic:view:cascade searches
+
+    This will create:
+      db/views/searches_v02.sql
+      db/migrate/20220714234219_update_searches_to_version_2.rb

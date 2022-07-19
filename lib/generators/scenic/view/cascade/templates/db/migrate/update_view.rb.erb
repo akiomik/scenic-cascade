@@ -1,0 +1,26 @@
+# frozen_string_literal: true
+
+class <%= migration_class_name %> < <%= activerecord_migration_class %>
+  def change
+  <%- dependents.reverse_each do |dep| -%>
+    drop_view <%= dep.formatted_name %>,
+              revert_to_version: <%= dep.version %>,
+              materialized: <%= dep.materialized? %>
+  <%- end -%>
+
+  <%- if materialized? -%>
+    update_view <%= formatted_plural_name %>,
+      version: <%= version %>,
+      revert_to_version: <%= previous_version %>,
+      materialized: <%= no_data? ? "{ no_data: true }" : true %>
+  <%- else -%>
+    update_view <%= formatted_plural_name %>, version: <%= version %>, revert_to_version: <%= previous_version %>
+  <%- end -%>
+
+  <%- dependents.each do |dep| -%>
+    create_view <%= dep.formatted_name %>,
+                version: <%= dep.version %>,
+                materialized: <%= dep.materialized? %>
+  <%- end -%>
+  end
+end

@@ -16,5 +16,9 @@ Style/StringLiteralsInInterpolation:
 Layout/LineLength:
   Max: 120
 
+RSpec/FilePath:
+  Exclude:
+    - spec/generators/**/*.rb
+
 RSpec/MultipleMemoizedHelpers:
   Max: 6

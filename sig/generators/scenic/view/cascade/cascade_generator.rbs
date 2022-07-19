@@ -1,0 +1,13 @@
+module Scenic
+  module Generators
+    module View
+      class CascadeGenerator < Scenic::Generators::ViewGenerator
+        def create_migration_file: -> void
+
+        private
+
+        def dependents: -> Array[Scenic::Dependencies::ViewWithVersion]
+      end
+    end
+  end
+end
