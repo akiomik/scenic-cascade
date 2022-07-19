@@ -1,0 +1,17 @@
+module Scenic
+  module Dependencies
+    interface _ViewWithVersionLike
+      def name: -> String
+      def version: -> Integer
+      def materialized?: -> bool
+    end
+
+    class ViewWithVersion < Scenic::Dependencies::View
+      attr_reader version: Integer
+
+      def initialize: (name: String, version: Integer, materialized: bool) -> void
+
+      def ==: (_ViewWithVersionLike) -> bool
+    end
+  end
+end
