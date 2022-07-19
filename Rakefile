@@ -12,11 +12,11 @@ require 'rubocop/rake_task'
 
 RuboCop::RakeTask.new
 
-task default: %i[spec rubocop]
-
 desc 'Run `bundle exec steep check`'
 task 'steep:check' do
   sh 'bundle exec steep check'
 end
 
 task steep: ['steep:check']
+
+task default: %i[spec rubocop steep:check]
