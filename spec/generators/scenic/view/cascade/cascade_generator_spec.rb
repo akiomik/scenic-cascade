@@ -4,6 +4,7 @@ require 'rails_helper'
 
 require 'generators/scenic/view/cascade/cascade_generator'
 
+# rubocop:disable RSpec/SpecFilePathFormat
 RSpec.describe Scenic::Generators::View::CascadeGenerator, size: :medium, type: :generator do
   let(:view_name) { 'searches' }
   let(:tempdir) { Dir.mktmpdir }
@@ -86,3 +87,4 @@ RSpec.describe Scenic::Generators::View::CascadeGenerator, size: :medium, type: 
     it { expect(migration).to contain_migration(:create_view, ':thirds', version: 2, materialized: false) }
   end
 end
+# rubocop:enable RSpec/SpecFilePathFormat
