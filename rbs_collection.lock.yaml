@@ -41,6 +41,14 @@ gems:
     revision: 73137fe17c719cf52eaf099d541c0fbd9192500e
     remote: https://github.com/ruby/gem_rbs_collection.git
     repo_dir: gems
+- name: base64
+  version: '0'
+  source:
+    type: stdlib
+- name: bigdecimal
+  version: '0'
+  source:
+    type: stdlib
 - name: concurrent-ruby
   version: '1.1'
   source:
@@ -49,7 +57,19 @@ gems:
     revision: 20e6e0f0685139dbd29df50e03367e222aa5d1b8
     remote: https://github.com/ruby/gem_rbs_collection.git
     repo_dir: gems
+- name: connection_pool
+  version: '2.4'
+  source:
+    type: git
+    name: ruby/gem_rbs_collection
+    revision: 20e6e0f0685139dbd29df50e03367e222aa5d1b8
+    remote: https://github.com/ruby/gem_rbs_collection.git
+    repo_dir: gems
 - name: date
+  version: '0'
+  source:
+    type: stdlib
+- name: dbm
   version: '0'
   source:
     type: stdlib
@@ -65,6 +85,10 @@ gems:
     revision: 73137fe17c719cf52eaf099d541c0fbd9192500e
     remote: https://github.com/ruby/gem_rbs_collection.git
     repo_dir: gems
+- name: io-console
+  version: '0'
+  source:
+    type: stdlib
 - name: logger
   version: '0'
   source:
@@ -90,6 +114,14 @@ gems:
     remote: https://github.com/ruby/gem_rbs_collection.git
     repo_dir: gems
 - name: pathname
+  version: '0'
+  source:
+    type: stdlib
+- name: pstore
+  version: '0'
+  source:
+    type: stdlib
+- name: psych
   version: '0'
   source:
     type: stdlib
@@ -125,6 +157,10 @@ gems:
     revision: 20e6e0f0685139dbd29df50e03367e222aa5d1b8
     remote: https://github.com/ruby/gem_rbs_collection.git
     repo_dir: gems
+- name: rdoc
+  version: '0'
+  source:
+    type: stdlib
 - name: singleton
   version: '0'
   source:
@@ -138,6 +174,10 @@ gems:
     remote: https://github.com/ruby/gem_rbs_collection.git
     repo_dir: gems
 - name: time
+  version: '0'
+  source:
+    type: stdlib
+- name: timeout
   version: '0'
   source:
     type: stdlib
