@@ -4,7 +4,7 @@ require 'rails_helper'
 
 require 'generators/scenic/view/cascade/cascade_generator'
 
-RSpec.describe Scenic::Generators::View::CascadeGenerator, type: :generator, size: :medium do
+RSpec.describe Scenic::Generators::View::CascadeGenerator, size: :medium, type: :generator do
   let(:view_name) { 'searches' }
   let(:tempdir) { Dir.mktmpdir }
 
