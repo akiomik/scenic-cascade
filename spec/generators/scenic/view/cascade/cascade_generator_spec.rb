@@ -6,7 +6,7 @@ require 'generators/scenic/view/cascade/cascade_generator'
 
 # rubocop:disable RSpec/SpecFilePathFormat
 RSpec.describe Scenic::Generators::View::CascadeGenerator, size: :medium, type: :generator do
-  let(:view_name) { 'searches' }
+  let(:view_name) { 'search_results' }
   let(:tempdir) { Dir.mktmpdir }
 
   before do

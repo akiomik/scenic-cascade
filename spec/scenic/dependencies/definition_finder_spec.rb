@@ -4,7 +4,7 @@ RSpec.describe Scenic::Dependencies::DefinitionFinder, size: :small do
   describe '.find_definitions_of' do
     subject(:actual) { Scenic::Dependencies.find_definitions_of(name) }
 
-    let(:name) { 'searches' }
+    let(:name) { 'search_results' }
     let(:root) { 'testapp' }
 
     before { allow(Rails).to receive(:root).and_return(Pathname.new(root)) }
@@ -26,7 +26,7 @@ RSpec.describe Scenic::Dependencies::DefinitionFinder, size: :small do
   describe '.find_latest_definition_of' do
     subject(:actual) { Scenic::Dependencies.find_latest_definition_of(name) }
 
-    let(:name) { 'searches' }
+    let(:name) { 'search_results' }
     let(:root) { 'testapp' }
 
     before { allow(Rails).to receive(:root).and_return(Pathname.new(root)) }

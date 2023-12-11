@@ -1,8 +1,6 @@
 # Scenic::Dependencies
 
-Welcome to your new gem! In this directory, you'll find the files you need to be able to package up your Ruby library into a gem. Put your Ruby code in the file `lib/scenic/dependencies`. To experiment with that code, run `bin/console` for an interactive prompt.
-
-TODO: Delete this and the text above, and describe your gem
+`scenic-dependencies` generates migration files with cascading view updates using [scenic](https://github.com/scenic-views/scenic).
 
 ## Installation
 
@@ -14,19 +12,71 @@ gem 'scenic-dependencies'
 
 And then execute:
 
-```sh
+```shell-session
 $ bundle install
 ```
 
 Or install it yourself as:
 
-```sh
+```shell-session
 $ gem install scenic-dependencies
 ```
 
 ## Usage
 
-TODO: Write usage instructions here
+To generate migration files, use `scenic:view:cascade` generator instead of `scenic:view`.
+The following example generates migration files for `search_results` view.
+
+```shell-session
+$ bin/rails generate scenic:view:cascade search_results
+      create db/views/search_results_v01.sql
+      create db/migrate/20220714233704_create_search_results.rb
+```
+
+## How it works
+
+Consider a situation where the following three views exist:
+
+* `first_results` is a parent view (version 1)
+* `second_results` is a materialized view that depends on `first_results` (version 3)
+* `third_results` is a view that depends on `first_results` and `second_results` (version 2)
+
+```sql
+-- first_results
+SELECT 'foo' AS bar;
+
+-- second_results
+SELECT * FROM first_results;
+
+-- third_results
+SELECT * FROM first_results UNION SELECT * FROM second_results;
+```
+
+Executing the `scenic:view:cascade` generator for `first_results` in this state will generate the following migration file:
+
+```shell-session
+$ bin/rails generate scenic:view:cascade first_results
+      create db/views/first_results_v02.sql
+      create db/migrate/20220714233704_update_first_results_to_version_2.rb
+```
+
+Since all dependencies are described, you can execute `bin/rails db:migrate` without changing the migration file.
+
+> [!WARNING]
+> Currently, index re-creation is not supported.
+> Please change a migration file to recreate indexes if it contains `drop_view` for materialized views.
+
+```ruby
+class UpdateSearchResultsToVersion2 < ActiveRecord::Migration
+  def change
+    drop_view :third_results, revert_to_version: 2, materialized: false
+    drop_view :second_results, revert_to_version: 3, materialized: true
+    replace_view :first_results, version: 2, revert_to_version: 1
+    create_view :second_results, version: 3, materialized: true
+    create_view :third_results, version: 2, materialized: false
+  end
+end
+```
 
 ## Development
 
