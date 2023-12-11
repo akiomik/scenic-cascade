@@ -1,5 +1,6 @@
 # scenic-cascade
 
+[![Gem Version](https://badge.fury.io/rb/scenic-cascade.svg)](https://badge.fury.io/rb/scenic-cascade)
 [![Ruby](https://github.com/akiomik/scenic-cascade/actions/workflows/ci.yml/badge.svg)](https://github.com/akiomik/scenic-cascade/actions/workflows/ci.yml)
 [![codecov](https://codecov.io/gh/akiomik/scenic-cascade/graph/badge.svg?token=SEHF4ZDZIY)](https://codecov.io/gh/akiomik/scenic-cascade)
 
