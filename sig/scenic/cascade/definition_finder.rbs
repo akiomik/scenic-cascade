@@ -1,5 +1,5 @@
 module Scenic
-  module Dependencies
+  module Cascade
     module DefinitionFinder
       module ClassMethods
         def find_definitions_of: (String) -> Array[Scenic::Definition]

@@ -13,7 +13,7 @@ class ViewLike
   end
 end
 
-RSpec.describe Scenic::Dependencies::View, size: :small do
+RSpec.describe Scenic::Cascade::View, size: :small do
   describe '.new' do
     subject(:new) { described_class.new(name: name, materialized: materialized) }
 

@@ -4,7 +4,7 @@ require 'active_record'
 require 'database_cleaner/active_record'
 require 'scenic'
 
-require 'scenic/dependencies'
+require 'scenic/cascade'
 
 Dir['./spec/support/**/*.rb'].sort.each { |f| require f }
 

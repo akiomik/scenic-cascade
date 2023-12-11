@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    scenic-dependencies (0.1.0)
+    scenic-cascade (0.1.0)
       scenic (~> 1.0)
 
 GEM
@@ -224,7 +224,7 @@ DEPENDENCIES
   rubocop-performance (~> 1.14)
   rubocop-rake (~> 0.6)
   rubocop-rspec (~> 2.12)
-  scenic-dependencies!
+  scenic-cascade!
   steep
 
 BUNDLED WITH

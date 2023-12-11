@@ -9,14 +9,14 @@ class DependencyLike
   end
 end
 
-RSpec.describe Scenic::Dependencies::Dependency, size: :small do
-  let(:view_first) { Scenic::Dependencies::View.new(name: 'view_first', materialized: false) }
-  let(:view_second) { Scenic::Dependencies::View.new(name: 'view_second', materialized: true) }
+RSpec.describe Scenic::Cascade::Dependency, size: :small do
+  let(:view_first) { Scenic::Cascade::View.new(name: 'view_first', materialized: false) }
+  let(:view_second) { Scenic::Cascade::View.new(name: 'view_second', materialized: true) }
 
   describe '.new' do
     subject(:new) { described_class.new(from: view_second, to: view_first) }
 
-    context 'when parameters are Scenic::Dependencies::View' do
+    context 'when parameters are Scenic::Cascade::View' do
       it { expect { new }.not_to raise_error }
       it { is_expected.to have_attributes(from: view_second, to: view_first) }
     end
@@ -45,7 +45,7 @@ RSpec.describe Scenic::Dependencies::Dependency, size: :small do
       it { is_expected.to be true }
     end
 
-    context 'when that has the same values but not Scenic::Dependencies::Dependency' do
+    context 'when that has the same values but not Scenic::Cascade::Dependency' do
       let(:that) { DependencyLike.new(from: view_second, to: view_first) }
 
       it { is_expected.to be true }

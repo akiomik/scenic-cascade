@@ -1,5 +1,5 @@
 module Scenic
-  module Dependencies
+  module Cascade
     interface _ViewLike
       def name: -> String
       def materialized?: -> bool

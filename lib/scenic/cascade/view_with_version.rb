@@ -1,9 +1,9 @@
 # frozen_string_literal: true
 
 module Scenic
-  module Dependencies
+  module Cascade
     # Represents a view with version
-    class ViewWithVersion < Scenic::Dependencies::View
+    class ViewWithVersion < Scenic::Cascade::View
       attr_reader :version
 
       def initialize(name:, version:, materialized:)

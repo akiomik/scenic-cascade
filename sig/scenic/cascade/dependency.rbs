@@ -1,15 +1,15 @@
 module Scenic
-  module Dependencies
+  module Cascade
     interface _DependencyLike
-      def from: -> Scenic::Dependencies::View
-      def to: -> Scenic::Dependencies::View
+      def from: -> Scenic::Cascade::View
+      def to: -> Scenic::Cascade::View
     end
 
     class Dependency
-      attr_reader from: Scenic::Dependencies::View
-      attr_reader to: Scenic::Dependencies::View
+      attr_reader from: Scenic::Cascade::View
+      attr_reader to: Scenic::Cascade::View
 
-      def initialize: (from: Scenic::Dependencies::View, to: Scenic::Dependencies::View) -> void
+      def initialize: (from: Scenic::Cascade::View, to: Scenic::Cascade::View) -> void
 
       def ==: (_DependencyLike) -> bool
 

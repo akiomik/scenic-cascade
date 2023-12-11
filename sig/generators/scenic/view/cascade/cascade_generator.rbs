@@ -6,7 +6,7 @@ module Scenic
 
         private
 
-        def dependents: -> Array[Scenic::Dependencies::ViewWithVersion]
+        def dependents: -> Array[Scenic::Cascade::ViewWithVersion]
       end
     end
   end

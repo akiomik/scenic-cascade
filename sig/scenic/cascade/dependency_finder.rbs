@@ -1,10 +1,10 @@
 module Scenic
-  module Dependencies
+  module Cascade
     module DependencyFinder
       module ClassMethods
         DEPENDENCY_SQL: String
 
-        def view_dependencies_of: (String, ?recursive: bool) -> Array[Scenic::Dependencies::Dependency]
+        def view_dependencies_of: (String, ?recursive: bool) -> Array[Scenic::Cascade::Dependency]
       end
     end
   end

@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require 'scenic/dependencies/view_with_version'
+require 'scenic/cascade/view_with_version'
 
 class ViewWithVersionLike
   attr_reader :name, :version
@@ -16,7 +16,7 @@ class ViewWithVersionLike
   end
 end
 
-RSpec.describe Scenic::Dependencies::ViewWithVersion, size: :small do
+RSpec.describe Scenic::Cascade::ViewWithVersion, size: :small do
   describe '.new' do
     subject(:new) { described_class.new(name: name, version: version, materialized: materialized) }
 

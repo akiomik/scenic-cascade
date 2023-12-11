@@ -4,7 +4,7 @@ require 'scenic/definition'
 
 module Scenic
   # Visualize database view dependencies for Scenic
-  module Dependencies
+  module Cascade
     # Finds view definitions
     module DefinitionFinder
       def self.included(klass)

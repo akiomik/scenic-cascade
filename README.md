@@ -1,15 +1,15 @@
-# Scenic::Dependencies
+# scenic-cascade
 
 [![Ruby](https://github.com/akiomik/scenic-cascade/actions/workflows/ci.yml/badge.svg)](https://github.com/akiomik/scenic-cascade/actions/workflows/ci.yml)
 
-`scenic-dependencies` is a migration file generator for [scenic](https://github.com/scenic-views/scenic) that supports cascading view update.
+`scenic-cascade` is a migration file generator for [scenic](https://github.com/scenic-views/scenic) that supports cascading view update.
 
 ## Installation
 
 Add this line to your application's Gemfile:
 
 ```ruby
-gem 'scenic-dependencies'
+gem 'scenic-cascade'
 ```
 
 And then execute:
@@ -21,7 +21,7 @@ $ bundle install
 Or install it yourself as:
 
 ```shell-session
-$ gem install scenic-dependencies
+$ gem install scenic-cascade
 ```
 
 ## Usage
@@ -88,8 +88,8 @@ To install this gem onto your local machine, run `bundle exec rake install`. To 
 
 ## Contributing
 
-Bug reports and pull requests are welcome on GitHub at https://github.com/akiomik/scenic-dependencies. This project is intended to be a safe, welcoming space for collaboration, and contributors are expected to adhere to the [code of conduct](https://github.com/akiomik/scenic-dependencies/blob/main/CODE_OF_CONDUCT.md).
+Bug reports and pull requests are welcome on GitHub at https://github.com/akiomik/scenic-cascade. This project is intended to be a safe, welcoming space for collaboration, and contributors are expected to adhere to the [code of conduct](https://github.com/akiomik/scenic-cascade/blob/main/CODE_OF_CONDUCT.md).
 
 ## Code of Conduct
 
-Everyone interacting in the Scenic::Dependencies project's codebases, issue trackers, chat rooms and mailing lists is expected to follow the [code of conduct](https://github.com/akiomik/scenic-dependencies/blob/main/CODE_OF_CONDUCT.md).
+Everyone interacting in the `scenic-cascade' project's codebases, issue trackers, chat rooms and mailing lists is expected to follow the [code of conduct](https://github.com/akiomik/scenic-cascade/blob/main/CODE_OF_CONDUCT.md).

@@ -2,9 +2,9 @@
 
 shared_examples 'a dependency finder' do
   let(:recursive) { false }
-  let(:view_first) { Scenic::Dependencies::View.new(name: 'view_first', materialized: false) }
-  let(:view_second) { Scenic::Dependencies::View.new(name: 'view_second', materialized: true) }
-  let(:view_third) { Scenic::Dependencies::View.new(name: 'view_third', materialized: false) }
+  let(:view_first) { Scenic::Cascade::View.new(name: 'view_first', materialized: false) }
+  let(:view_second) { Scenic::Cascade::View.new(name: 'view_second', materialized: true) }
+  let(:view_third) { Scenic::Cascade::View.new(name: 'view_third', materialized: false) }
 
   before do
     adapter = Scenic::Adapters::Postgres.new
@@ -37,7 +37,7 @@ shared_examples 'a dependency finder' do
   context 'when the target view has dependencies' do
     let(:name) { 'view_second' }
 
-    it { is_expected.to match [Scenic::Dependencies::Dependency.new(from: view_second, to: view_first)] }
+    it { is_expected.to match [Scenic::Cascade::Dependency.new(from: view_second, to: view_first)] }
   end
 
   context 'when the target view has nested dependencies and recursive is false' do
@@ -45,8 +45,8 @@ shared_examples 'a dependency finder' do
 
     let(:expected) do
       [
-        Scenic::Dependencies::Dependency.new(from: view_third, to: view_first),
-        Scenic::Dependencies::Dependency.new(from: view_third, to: view_second)
+        Scenic::Cascade::Dependency.new(from: view_third, to: view_first),
+        Scenic::Cascade::Dependency.new(from: view_third, to: view_second)
       ]
     end
 
@@ -59,9 +59,9 @@ shared_examples 'a dependency finder' do
 
     let(:expected) do
       [
-        Scenic::Dependencies::Dependency.new(from: view_third, to: view_first),
-        Scenic::Dependencies::Dependency.new(from: view_third, to: view_second),
-        Scenic::Dependencies::Dependency.new(from: view_second, to: view_first)
+        Scenic::Cascade::Dependency.new(from: view_third, to: view_first),
+        Scenic::Cascade::Dependency.new(from: view_third, to: view_second),
+        Scenic::Cascade::Dependency.new(from: view_second, to: view_first)
       ]
     end
 

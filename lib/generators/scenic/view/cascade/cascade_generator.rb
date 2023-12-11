@@ -24,12 +24,12 @@ module Scenic
         def dependents
           return @dependents if @dependents.present?
 
-          deps = Scenic::Dependencies.view_dependents_of(plural_name, recursive: true)
+          deps = Scenic::Cascade.view_dependents_of(plural_name, recursive: true)
           @dependents ||= deps.map do |dep|
             name = dep.from.name
-            version = Scenic::Dependencies.find_latest_definition_of(name).version.to_i
+            version = Scenic::Cascade.find_latest_definition_of(name).version.to_i
             is_materialized = dep.from.materialized?
-            Scenic::Dependencies::ViewWithVersion.new(name: name, version: version, materialized: is_materialized)
+            Scenic::Cascade::ViewWithVersion.new(name: name, version: version, materialized: is_materialized)
           end.uniq
         end
       end

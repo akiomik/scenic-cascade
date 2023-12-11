@@ -1,23 +1,23 @@
 # frozen_string_literal: true
 
-require_relative 'lib/scenic/dependencies/version'
+require_relative 'lib/scenic/cascade/version'
 
 Gem::Specification.new do |spec|
-  spec.name = 'scenic-dependencies'
-  spec.version = Scenic::Dependencies::VERSION
+  spec.name = 'scenic-cascade'
+  spec.version = Scenic::Cascade::VERSION
   spec.authors = ['Akiomi Kamakura']
   spec.email = ['akiomik@gmail.com']
 
-  spec.summary = 'Visualize database view dependencies for Scenic'
+  spec.summary = 'A migration file generator for scenic that supports cascading view update'
   spec.description = spec.summary # TODO
-  spec.homepage = 'https://github.com/akiomik/scenic-dependencies'
+  spec.homepage = 'https://github.com/akiomik/scenic-cascade'
   spec.required_ruby_version = '>= 2.6.0'
 
   spec.metadata['allowed_push_host'] = "TODO: Set to your gem server 'https://example.com'"
 
   spec.metadata['homepage_uri'] = spec.homepage
-  spec.metadata['source_code_uri'] = 'https://github.com/akiomik/scenic-dependencies'
-  spec.metadata['changelog_uri'] = 'https://github.com/akiomik/scenic-dependencies/blob/main/CHANGELOG.md'
+  spec.metadata['source_code_uri'] = 'https://github.com/akiomik/scenic-cascade'
+  spec.metadata['changelog_uri'] = 'https://github.com/akiomik/scenic-cascade/blob/main/CHANGELOG.md'
 
   spec.metadata['rubygems_mfa_required'] = 'true'
 

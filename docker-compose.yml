@@ -3,7 +3,7 @@ services:
   lib:
     build: .
     volumes:
-      - .:/scenic-dependencies
+      - .:/scenic-cascade
     env_file:
       .env
     links:

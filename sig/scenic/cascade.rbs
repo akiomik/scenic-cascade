@@ -1,5 +1,5 @@
 module Scenic
-  module Dependencies
+  module Cascade
     VERSION: String
 
     def self.find_definitions_of: (String) -> Scenic::Definition

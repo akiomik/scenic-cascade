@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module Scenic
-  module Dependencies
+  module Cascade
     # Represents a view
     class View
       attr_reader :name

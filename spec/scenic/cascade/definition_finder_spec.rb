@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
-RSpec.describe Scenic::Dependencies::DefinitionFinder, size: :small do
+RSpec.describe Scenic::Cascade::DefinitionFinder, size: :small do
   describe '.find_definitions_of' do
-    subject(:actual) { Scenic::Dependencies.find_definitions_of(name) }
+    subject(:actual) { Scenic::Cascade.find_definitions_of(name) }
 
     let(:name) { 'search_results' }
     let(:root) { 'testapp' }
@@ -24,7 +24,7 @@ RSpec.describe Scenic::Dependencies::DefinitionFinder, size: :small do
   end
 
   describe '.find_latest_definition_of' do
-    subject(:actual) { Scenic::Dependencies.find_latest_definition_of(name) }
+    subject(:actual) { Scenic::Cascade.find_latest_definition_of(name) }
 
     let(:name) { 'search_results' }
     let(:root) { 'testapp' }
