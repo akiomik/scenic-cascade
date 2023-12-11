@@ -1,6 +1,6 @@
 # Scenic::Dependencies
 
-`scenic-dependencies` generates migration files with cascading view updates using [scenic](https://github.com/scenic-views/scenic).
+`scenic-dependencies` is a migration file generator for [scenic](https://github.com/scenic-views/scenic) that supports cascading view update.
 
 ## Installation
 
