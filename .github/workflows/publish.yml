@@ -12,6 +12,6 @@ jobs:
           ruby-version: 3.2
           bundler-cache: true
       - run: gem build
-      - run: gem publish
+      - run: gem push
         env:
           GEM_HOST_API_KEY: ${{ secrets.GEM_HOST_API_KEY }}
