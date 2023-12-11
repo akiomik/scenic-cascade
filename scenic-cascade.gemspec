@@ -8,7 +8,7 @@ Gem::Specification.new do |spec|
   spec.authors = ['Akiomi Kamakura']
   spec.email = ['akiomik@gmail.com']
 
-  spec.summary = 'A migration file generator for scenic that supports cascading view update'
+  spec.summary = 'A migration scenic file generator that supports cascading view updates'
   spec.description = spec.summary # TODO
   spec.homepage = 'https://github.com/akiomik/scenic-cascade'
   spec.required_ruby_version = '>= 2.6.0'

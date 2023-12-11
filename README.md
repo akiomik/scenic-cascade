@@ -2,7 +2,7 @@
 
 [![Ruby](https://github.com/akiomik/scenic-cascade/actions/workflows/ci.yml/badge.svg)](https://github.com/akiomik/scenic-cascade/actions/workflows/ci.yml)
 
-`scenic-cascade` is a migration file generator for [scenic](https://github.com/scenic-views/scenic) that supports cascading view update.
+`scenic-cascade` is a [scenic](https://github.com/scenic-views/scenic) migration file generator that supports cascading view updates.
 
 ## Installation
 
