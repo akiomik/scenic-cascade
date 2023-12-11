@@ -1,6 +1,7 @@
 # scenic-cascade
 
 [![Ruby](https://github.com/akiomik/scenic-cascade/actions/workflows/ci.yml/badge.svg)](https://github.com/akiomik/scenic-cascade/actions/workflows/ci.yml)
+[![codecov](https://codecov.io/gh/akiomik/scenic-cascade/graph/badge.svg?token=SEHF4ZDZIY)](https://codecov.io/gh/akiomik/scenic-cascade)
 
 `scenic-cascade` is a [scenic](https://github.com/scenic-views/scenic) migration file generator that supports cascading view updates.
 
