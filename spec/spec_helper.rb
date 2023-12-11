@@ -3,6 +3,11 @@
 require 'active_record'
 require 'database_cleaner/active_record'
 require 'scenic'
+require 'simplecov'
+require 'simplecov-cobertura'
+
+SimpleCov.start 'rails'
+SimpleCov.formatter = SimpleCov::Formatter::CoberturaFormatter
 
 require 'scenic/cascade'
 
