@@ -16,3 +16,7 @@ gems:
   # Racc is not used directly, and its current signatures require a newer RBS parser.
   - name: racc
     ignore: true
+  # The CGI gem's signatures depend on StringIO signatures absent from RBS 3.3.2.
+  # CGI is not used by this library directly.
+  - name: cgi
+    ignore: true
