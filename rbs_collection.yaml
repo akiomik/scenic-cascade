@@ -13,3 +13,6 @@ gems:
   # It's unnecessary if you don't use rbs as a library.
   - name: rbs
     ignore: true
+  # Racc is not used directly, and its current signatures require a newer RBS parser.
+  - name: racc
+    ignore: true
