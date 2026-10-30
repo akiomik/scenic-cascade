@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    scenic-cascade (0.1.0)
+    scenic-cascade (0.1.1)
       scenic (~> 1.0)
 
 GEM

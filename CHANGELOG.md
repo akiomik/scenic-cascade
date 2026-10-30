@@ -7,6 +7,8 @@ and this project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.ht
 
 ## [Unreleased]
 
+## [0.1.1] - 2026-10-30
+
 ### Fixed
 
 - Restore cascading migrations for deep dependency chains and views reached through multiple paths.
@@ -17,5 +19,6 @@ and this project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.ht
 
 - Initial release of the cascading Scenic view migration generator.
 
-[Unreleased]: https://github.com/akiomik/scenic-cascade/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/akiomik/scenic-cascade/compare/v0.1.1...HEAD
+[0.1.1]: https://github.com/akiomik/scenic-cascade/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/akiomik/scenic-cascade/releases/tag/v0.1.0
