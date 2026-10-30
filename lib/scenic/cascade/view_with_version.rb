@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require_relative 'view'
+
 module Scenic
   module Cascade
     # Represents a view with version

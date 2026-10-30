@@ -7,6 +7,10 @@ and this project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.ht
 
 ## [Unreleased]
 
+### Fixed
+
+- Restore cascading migrations for deep dependency chains and views reached through multiple paths.
+
 ## [0.1.0] - 2023-12-11
 
 ### Added

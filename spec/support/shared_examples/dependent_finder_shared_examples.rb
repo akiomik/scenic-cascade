@@ -67,4 +67,36 @@ shared_examples 'a dependent finder' do
 
     it { is_expected.to match expected }
   end
+
+  context 'when recursive dependents extend beyond two levels' do
+    let(:name) { 'root_chain' }
+    let(:recursive) { true }
+
+    let(:expected) do
+      [
+        Scenic::Cascade::Dependency.new(
+          from: Scenic::Cascade::View.new(name: 'mid_one', materialized: false),
+          to: Scenic::Cascade::View.new(name: 'root_chain', materialized: false)
+        ),
+        Scenic::Cascade::Dependency.new(
+          from: Scenic::Cascade::View.new(name: 'mid_two', materialized: false),
+          to: Scenic::Cascade::View.new(name: 'mid_one', materialized: false)
+        ),
+        Scenic::Cascade::Dependency.new(
+          from: Scenic::Cascade::View.new(name: 'leaf_chain', materialized: false),
+          to: Scenic::Cascade::View.new(name: 'mid_two', materialized: false)
+        )
+      ]
+    end
+
+    before do
+      adapter = Scenic::Adapters::Postgres.new
+      adapter.create_view('root_chain', "SELECT 'foo' AS bar")
+      adapter.create_view('mid_one', 'SELECT * FROM root_chain')
+      adapter.create_view('mid_two', 'SELECT * FROM mid_one')
+      adapter.create_view('leaf_chain', 'SELECT * FROM mid_two')
+    end
+
+    it { is_expected.to match expected }
+  end
 end
