@@ -11,9 +11,11 @@ gem 'rake', '~> 13.0'
 gem 'steep', require: false
 
 # testing
+gem 'activerecord', '~> 7.1.0'
 gem 'ammeter', '~> 1.1'
 gem 'database_cleaner-active_record', '~> 2.0'
 gem 'pg', '~> 1.0'
+gem 'railties', '~> 7.1.0'
 gem 'rspec', '~> 3.0'
 gem 'simplecov', require: false
 gem 'simplecov-cobertura', '~> 3.2', require: false
