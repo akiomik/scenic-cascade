@@ -16,7 +16,7 @@ gem 'database_cleaner-active_record', '~> 2.0'
 gem 'pg', '~> 1.0'
 gem 'rspec', '~> 3.0'
 gem 'simplecov', require: false
-gem 'simplecov-cobertura', require: false
+gem 'simplecov-cobertura', '~> 3.2', require: false
 
 # linting
 gem 'rubocop', '~> 1.21', require: false

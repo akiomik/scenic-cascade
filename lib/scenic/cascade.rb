@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 require 'active_record'
+# Scenic 1.9 uses TSort while loading but does not require it.
+require 'tsort'
 require 'scenic'
 
 require_relative 'cascade/version'

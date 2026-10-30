@@ -50,7 +50,7 @@ GEM
     builder (3.2.4)
     concurrent-ruby (1.3.7)
     connection_pool (2.4.1)
-    crass (1.0.6)
+    crass (1.0.8)
     csv (3.2.8)
     database_cleaner-active_record (2.1.0)
       activerecord (>= 5.a)
@@ -75,7 +75,7 @@ GEM
       rb-fsevent (~> 0.10, >= 0.10.3)
       rb-inotify (~> 0.9, >= 0.9.10)
     logger (1.6.0)
-    loofah (2.22.0)
+    loofah (2.25.2)
       crass (~> 1.0.2)
       nokogiri (>= 1.12.0)
     minitest (5.20.0)
@@ -129,7 +129,7 @@ GEM
     regexp_parser (2.8.3)
     reline (0.4.1)
       io-console (~> 0.5)
-    rexml (3.3.9)
+    rexml (3.4.4)
     rspec (3.12.0)
       rspec-core (~> 3.12.0)
       rspec-expectations (~> 3.12.0)
@@ -179,7 +179,7 @@ GEM
       rubocop-factory_bot (~> 2.22)
     ruby-progressbar (1.13.0)
     ruby2_keywords (0.0.5)
-    scenic (1.7.0)
+    scenic (1.9.0)
       activerecord (>= 4.0.0)
       railties (>= 4.0.0)
     securerandom (0.3.0)
@@ -187,7 +187,7 @@ GEM
       docile (~> 1.1)
       simplecov-html (~> 0.11)
       simplecov_json_formatter (~> 0.1)
-    simplecov-cobertura (2.1.0)
+    simplecov-cobertura (3.2.0)
       rexml
       simplecov (~> 0.19)
     simplecov-html (0.12.3)
@@ -236,7 +236,7 @@ DEPENDENCIES
   rubocop-rspec (~> 2.12)
   scenic-cascade!
   simplecov
-  simplecov-cobertura
+  simplecov-cobertura (~> 3.2)
   steep
 
 BUNDLED WITH
