@@ -11,12 +11,16 @@ gem 'rake', '~> 13.0'
 gem 'steep', require: false
 
 # testing
+gem 'activerecord', '~> 7.1.0'
 gem 'ammeter', '~> 1.1'
 gem 'database_cleaner-active_record', '~> 2.0'
+# Nokogiri 1.19 drops Ruby 3.1, which remains in the CI matrix.
+gem 'nokogiri', '~> 1.18.0'
 gem 'pg', '~> 1.0'
+gem 'railties', '~> 7.1.0'
 gem 'rspec', '~> 3.0'
 gem 'simplecov', require: false
-gem 'simplecov-cobertura', require: false
+gem 'simplecov-cobertura', '~> 3.2', require: false
 
 # linting
 gem 'rubocop', '~> 1.21', require: false

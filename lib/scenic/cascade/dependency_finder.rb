@@ -42,7 +42,7 @@ module Scenic
           return dependencies unless recursive
 
           dependencies.flat_map do |dependency|
-            [dependency, *view_dependencies_of(dependency.to.name)]
+            [dependency, *view_dependencies_of(dependency.to.name, recursive: true)]
           end
         end
       end

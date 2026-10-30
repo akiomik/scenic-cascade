@@ -9,12 +9,12 @@ jobs:
       - uses: actions/checkout@v4
       - uses: ruby/setup-ruby@v1
         with:
-          ruby-version: 3.2
+          ruby-version: 3.4
           bundler-cache: true
       - id: version
         run: |
           version=$(echo ${{ github.event.release.tag_name }} | cut -c 2-)
-          echo "GEM_VERSION=$version" >> $GITHUB_OUTPUT
+          echo "version=$version" >> "$GITHUB_OUTPUT"
       - run: gem build
       - run: gem push scenic-cascade-${{ steps.version.outputs.version }}.gem
         env:

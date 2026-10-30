@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 require 'generators/scenic/view/view_generator'
+require 'scenic/cascade'
+require 'scenic/cascade/view_with_version'
 
 module Scenic
   module Generators
@@ -25,12 +27,15 @@ module Scenic
           return @dependents if @dependents.present?
 
           deps = Scenic::Cascade.view_dependents_of(plural_name, recursive: true)
-          @dependents ||= deps.map do |dep|
-            name = dep.from.name
-            version = Scenic::Cascade.find_latest_definition_of(name).version.to_i
-            is_materialized = dep.from.materialized?
-            Scenic::Cascade::ViewWithVersion.new(name: name, version: version, materialized: is_materialized)
-          end.uniq
+          views = deps.map { |dep| view_with_version_for(dep) }
+          # The last visit follows every prerequisite, even when names sort in the opposite order.
+          @dependents = views.reverse.uniq { |view| [view.name, view.version, view.materialized?] }.reverse
+        end
+
+        def view_with_version_for(dep)
+          name = dep.from.name
+          version = Scenic::Cascade.find_latest_definition_of(name).version.to_i
+          Scenic::Cascade::ViewWithVersion.new(name: name, version: version, materialized: dep.from.materialized?)
         end
       end
     end
