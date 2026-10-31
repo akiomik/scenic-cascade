@@ -24,7 +24,8 @@ module Scenic
         private
 
         def dependents
-          return @dependents if @dependents.present?
+          cached_dependents = @dependents
+          return cached_dependents unless cached_dependents.nil?
 
           deps = Scenic::Cascade.view_dependents_of(plural_name, recursive: true)
           views = deps.map { |dep| view_with_version_for(dep) }

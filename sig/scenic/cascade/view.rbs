@@ -7,10 +7,12 @@ module Scenic
 
     class View
       attr_reader name: String
+      @materialized: bool
 
       def initialize: (name: String, materialized: bool) -> void
 
       def materialized?: -> bool
+      def formatted_name: -> String
 
       def ==: (_ViewLike) -> bool
 
