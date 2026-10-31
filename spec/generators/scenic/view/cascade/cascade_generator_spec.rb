@@ -105,9 +105,8 @@ RSpec.describe Scenic::Generators::View::CascadeGenerator, size: :medium, type: 
       FileUtils.mkpath(File.dirname(prev_view_definition))
       File.write(prev_view_definition, "SELECT 'foo' AS bar")
 
-      # Setup zeta
+      # Leave a version gap in zeta's definitions.
       FileUtils.touch(file('db/views/zeta_v01.sql'))
-      FileUtils.touch(file('db/views/zeta_v02.sql'))
       File.write(file('db/views/zeta_v03.sql'), 'SELECT * FROM firsts')
 
       # Setup alpha
@@ -125,7 +124,11 @@ RSpec.describe Scenic::Generators::View::CascadeGenerator, size: :medium, type: 
     it { expect(view_definition).to exist }
     it { expect(migration).to contain_migration(:drop_view, ':alpha', revert_to_version: 2, materialized: false) }
     it { expect(migration).to contain_migration(:drop_view, ':zeta', revert_to_version: 3, materialized: true) }
-    it { expect(migration).to contain_migration(:create_view, ':zeta', version: 3, materialized: true) }
+
+    it 'recreates zeta from version three across the definition gap' do
+      expect(migration).to contain_migration(:create_view, ':zeta', version: 3, materialized: true)
+    end
+
     it { expect(migration).to contain_migration(:create_view, ':alpha', version: 2, materialized: false) }
 
     it 'applies and reverses the generated migration with dependent views' do

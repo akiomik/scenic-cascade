@@ -42,7 +42,9 @@ module Scenic
           return unless match && match[:version].to_i.positive?
 
           definition = Scenic::Definition.new(view_name, match[:version].to_i)
-          definition if definition.full_path == path
+          return definition if definition.full_path == path
+
+          raise ArgumentError, "Noncanonical view definition #{path}; expected #{definition.full_path}"
         end
       end
     end
