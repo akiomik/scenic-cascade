@@ -61,6 +61,14 @@ gems:
     revision: 9e17daa08b1710667699a208981cffd21dbf15f6
     remote: https://github.com/ruby/gem_rbs_collection.git
     repo_dir: gems
+- name: cgi
+  version: '0.5'
+  source:
+    type: git
+    name: ruby/gem_rbs_collection
+    revision: 9e17daa08b1710667699a208981cffd21dbf15f6
+    remote: https://github.com/ruby/gem_rbs_collection.git
+    repo_dir: gems
 - name: concurrent-ruby
   version: '1.1'
   source:
@@ -78,10 +86,6 @@ gems:
     remote: https://github.com/ruby/gem_rbs_collection.git
     repo_dir: gems
 - name: date
-  version: '0'
-  source:
-    type: stdlib
-- name: dbm
   version: '0'
   source:
     type: stdlib
@@ -157,14 +161,14 @@ gems:
   version: '0'
   source:
     type: stdlib
-- name: pstore
-  version: '0'
+- name: racc
+  version: '1.8'
   source:
-    type: stdlib
-- name: psych
-  version: '0'
-  source:
-    type: stdlib
+    type: git
+    name: ruby/gem_rbs_collection
+    revision: 9e17daa08b1710667699a208981cffd21dbf15f6
+    remote: https://github.com/ruby/gem_rbs_collection.git
+    repo_dir: gems
 - name: rack
   version: '2.2'
   source:
@@ -222,6 +226,10 @@ gems:
   source:
     type: stdlib
 - name: stringio
+  version: '0'
+  source:
+    type: stdlib
+- name: tempfile
   version: '0'
   source:
     type: stdlib

@@ -14,8 +14,3 @@ gems:
   # It's unnecessary if you don't use rbs as a library.
   - name: rbs
     ignore: true
-  # These transitive dependencies are not used directly by this library.
-  - name: racc
-    ignore: true
-  - name: cgi
-    ignore: true
