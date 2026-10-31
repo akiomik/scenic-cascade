@@ -371,7 +371,7 @@ RSpec.describe Scenic::Generators::View::CascadeGenerator, size: :medium, type: 
     before do
       ActiveRecord::Base.connection.execute('CREATE SCHEMA reporting')
       create_view_with_definition('public.schema_bases', "SELECT 'foo' AS bar")
-      create_view_with_definition('schema_reports', 'SELECT * FROM public.schema_bases')
+      create_view_with_definition('public.schema_reports', 'SELECT * FROM public.schema_bases')
       create_view_with_definition('public.explicit_reports', 'SELECT * FROM public.schema_bases')
       create_view_with_definition('reporting.schema_bases', "SELECT 'other' AS bar")
       create_view_with_definition('reporting.schema_reports', 'SELECT * FROM reporting.schema_bases')
@@ -410,6 +410,30 @@ RSpec.describe Scenic::Generators::View::CascadeGenerator, size: :medium, type: 
         run_generator ['public.schema_bases']
       rescue ArgumentError => e
         raise unless e.message.include?('ambiguous Scenic definitions')
+      end.not_to(change { Dir.glob(file('db/{views,migrate}/*')) })
+    end
+  end
+
+  context 'when a bare definition resolves to another schema first' do
+    before do
+      ActiveRecord::Base.connection.execute('CREATE SCHEMA reporting')
+      create_view_with_definition('public.schema_bases', "SELECT 'foo' AS bar")
+      Scenic::Adapters::Postgres.new.create_view('public.schema_reports', 'SELECT * FROM public.schema_bases')
+      Scenic::Adapters::Postgres.new.create_view('reporting.schema_reports', "SELECT 'other' AS bar")
+      File.write(file('db/views/schema_reports_v01.sql'), "SELECT 'other' AS bar")
+      ActiveRecord::Base.connection.execute('SET LOCAL search_path TO reporting, public')
+    end
+
+    it 'rejects a bare definition that could belong to the first schema' do
+      expect { run_generator ['public.schema_bases'] }
+        .to raise_error(ArgumentError, /no unambiguous Scenic definition file/)
+    end
+
+    it 'does not write a definition or migration' do
+      expect do
+        run_generator ['public.schema_bases']
+      rescue ArgumentError => e
+        raise unless e.message.include?('no unambiguous Scenic definition file')
       end.not_to(change { Dir.glob(file('db/{views,migrate}/*')) })
     end
   end

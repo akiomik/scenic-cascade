@@ -54,13 +54,24 @@ module Scenic
           return name if name.include?('.')
 
           qualified = qualified_name(name)
-          return name unless Scenic::Cascade.find_definitions_of(qualified).any?
+          qualified_definitions = Scenic::Cascade.find_definitions_of(qualified)
+          bare_definitions = Scenic::Cascade.find_definitions_of(name)
 
-          if Scenic::Cascade.find_definitions_of(name).any?
+          if qualified_definitions.any? && bare_definitions.any?
             raise ArgumentError, "Dependent view #{name} has ambiguous Scenic definitions: #{name} and #{qualified}"
           end
 
-          qualified
+          return qualified if qualified_definitions.any?
+          return name if bare_definitions.empty? || bare_name_resolves_to_public?(name)
+
+          raise ArgumentError, "Dependent view #{name} has no unambiguous Scenic definition file for #{qualified}"
+        end
+
+        def bare_name_resolves_to_public?(name)
+          connection = ActiveRecord::Base.connection
+          bare = connection.quote(connection.quote_table_name(name))
+          qualified = connection.quote(connection.quote_table_name(qualified_name(name)))
+          connection.select_value("SELECT to_regclass(#{bare}) = to_regclass(#{qualified})")
         end
 
         def qualified_name(name)
