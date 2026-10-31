@@ -8,8 +8,8 @@ RSpec::Matchers.define :contain_migration do |method, *args, **kwargs|
     content = File.read(timestamped_migration_file)
 
     args_sep = ',\s+'
-    serialized_args = args.join(args_sep)
-    serialized_kwargs = kwargs.map { |key, value| "#{key}: #{value}" }.join(args_sep)
+    serialized_args = args.map { |arg| Regexp.escape(arg.to_s) }.join(args_sep)
+    serialized_kwargs = kwargs.map { |key, value| Regexp.escape("#{key}: #{value}") }.join(args_sep)
 
     content.match?(/#{method}\s+#{[serialized_args, serialized_kwargs].join(args_sep)}/)
   end

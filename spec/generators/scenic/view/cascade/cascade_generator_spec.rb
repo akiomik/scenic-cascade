@@ -11,7 +11,7 @@ RSpec.describe Scenic::Generators::View::CascadeGenerator, size: :medium, type: 
 
   def create_view_with_definition(name, sql)
     Scenic::Adapters::Postgres.new.create_view(name, sql)
-    path = file("db/views/#{name}_v01.sql")
+    path = Scenic::Definition.new(name, 1).full_path
     FileUtils.mkpath(File.dirname(path))
     File.write(path, sql)
   end
@@ -122,14 +122,30 @@ RSpec.describe Scenic::Generators::View::CascadeGenerator, size: :medium, type: 
 
     it { expect(migration).to be_a_migration }
     it { expect(view_definition).to exist }
-    it { expect(migration).to contain_migration(:drop_view, ':alpha', revert_to_version: 2, materialized: false) }
-    it { expect(migration).to contain_migration(:drop_view, ':zeta', revert_to_version: 3, materialized: true) }
 
-    it 'recreates zeta from version three across the definition gap' do
-      expect(migration).to contain_migration(:create_view, ':zeta', version: 3, materialized: true)
+    it 'drops alpha before updating firsts' do
+      expect(migration).to contain_migration(
+        :drop_view, 'ExactViewName.new("alpha")', revert_to_version: 2, materialized: false
+      )
     end
 
-    it { expect(migration).to contain_migration(:create_view, ':alpha', version: 2, materialized: false) }
+    it 'drops zeta before updating firsts' do
+      expect(migration).to contain_migration(
+        :drop_view, 'ExactViewName.new("zeta")', revert_to_version: 3, materialized: true
+      )
+    end
+
+    it 'recreates zeta from version three across the definition gap' do
+      expect(migration).to contain_migration(
+        :create_view, 'ExactViewName.new("zeta")', version: 3, materialized: true
+      )
+    end
+
+    it 'recreates alpha after updating firsts' do
+      expect(migration).to contain_migration(
+        :create_view, 'ExactViewName.new("alpha")', version: 2, materialized: false
+      )
+    end
 
     it 'applies and reverses the generated migration with dependent views' do
       actual = %i[up down].map do |direction|
@@ -151,6 +167,45 @@ RSpec.describe Scenic::Generators::View::CascadeGenerator, size: :medium, type: 
 
     it 'updates and restores the deepest dependent view' do
       expect_bases_round_trip('v_d')
+    end
+  end
+
+  context 'when table_name_prefix is configured' do
+    let(:migration) { file('db/migrate/update_bases_to_version_2.rb') }
+
+    around do |example|
+      original_prefix = ActiveRecord::Base.table_name_prefix
+      ActiveRecord::Base.table_name_prefix = 'app_'
+      example.run
+    ensure
+      ActiveRecord::Base.table_name_prefix = original_prefix
+    end
+
+    before do
+      create_view_with_definition('app_bases', "SELECT 'foo' AS bar")
+      create_view_with_definition('app_reports', 'SELECT * FROM app_bases')
+      create_view_with_definition('legacy_reports', 'SELECT * FROM app_bases')
+      run_generator ['bases']
+    end
+
+    it 'drops the prefixed dependent using its database name' do
+      expect(migration).to contain_migration(
+        :drop_view, 'ExactViewName.new("app_reports")', revert_to_version: 1, materialized: false
+      )
+    end
+
+    it 'recreates the unprefixed dependent using its database name' do
+      expect(migration).to contain_migration(
+        :create_view, 'ExactViewName.new("legacy_reports")', version: 1, materialized: false
+      )
+    end
+
+    it 'updates and restores the prefixed dependent view' do
+      expect_bases_round_trip('app_reports')
+    end
+
+    it 'updates and restores the unprefixed dependent view' do
+      expect_bases_round_trip('legacy_reports')
     end
   end
 
