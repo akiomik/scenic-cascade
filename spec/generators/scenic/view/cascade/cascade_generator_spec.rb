@@ -67,6 +67,118 @@ RSpec.describe Scenic::Generators::View::CascadeGenerator, size: :medium, type: 
 
     it { expect(migration).to be_a_migration }
     it { expect(view_definition).to exist }
+
+    it 'uses update_view by default' do
+      expect(migration).to contain_migration(:update_view, ':search_results', version: 2, revert_to_version: 1)
+    end
+  end
+
+  context 'when replacing an existing view with a dependent' do
+    let(:migration) { file('db/migrate/update_bases_to_version_2.rb') }
+    let(:migration_sql) { File.read(Dir.glob(file('db/migrate/*_update_bases_to_version_2.rb')).fetch(0)) }
+
+    before do
+      create_view_with_definition('bases', "SELECT 'foo' AS bar")
+      create_view_with_definition('reports', 'SELECT * FROM bases')
+      run_generator ['bases', '--replace']
+    end
+
+    it 'uses replace_view for the target' do
+      expect(migration).to contain_migration(:replace_view, ':bases', version: 2, revert_to_version: 1)
+    end
+
+    it 'still drops and recreates the dependent view' do
+      expect(migration_sql).to include('drop_view ExactViewName.new("public.reports")',
+                                       'create_view ExactViewName.new("public.reports")')
+    end
+
+    it 'applies and reverses the generated migration' do
+      expect_bases_round_trip('reports')
+    end
+  end
+
+  context 'when updating a materialized view side by side' do
+    let(:migration) { file('db/migrate/update_bases_to_version_2.rb') }
+    let(:migration_sql) { File.read(Dir.glob(file('db/migrate/*_update_bases_to_version_2.rb')).fetch(0)) }
+
+    before do
+      Scenic::Adapters::Postgres.new.create_materialized_view('bases', "SELECT 'foo' AS bar")
+      FileUtils.mkpath(file('db/views'))
+      File.write(file('db/views/bases_v01.sql'), "SELECT 'foo' AS bar")
+      create_view_with_definition('reports', 'SELECT * FROM bases')
+      run_generator ['bases', '--materialized', '--side-by-side']
+    end
+
+    it 'passes the side-by-side option to update_view' do
+      expect(migration_sql).to include('materialized: { side_by_side: true }')
+    end
+
+    it 'still drops and recreates the dependent view' do
+      expect(migration_sql).to include('drop_view ExactViewName.new("public.reports")',
+                                       'create_view ExactViewName.new("public.reports")')
+    end
+
+    it 'applies and reverses the generated migration' do
+      expect_bases_round_trip('reports')
+    end
+  end
+
+  context 'when updating a materialized view without data' do
+    before do
+      Scenic::Adapters::Postgres.new.create_materialized_view('bases', "SELECT 'foo' AS bar")
+      FileUtils.mkpath(file('db/views'))
+      File.write(file('db/views/bases_v01.sql'), "SELECT 'foo' AS bar")
+      run_generator ['bases', '--materialized', '--no-data']
+    end
+
+    it 'retains the no-data option' do
+      migration = Dir.glob(file('db/migrate/*_update_bases_to_version_2.rb')).fetch(0)
+      expect(File.read(migration)).to include('materialized: { no_data: true }')
+    end
+  end
+
+  context 'when update options cannot be honored' do
+    before { create_view_with_definition('bases', "SELECT 'foo' AS bar") }
+
+    {
+      '--side-by-side' => /requires --materialized/,
+      '--materialized --replace' => /--replace cannot update a materialized view/,
+      '--materialized --side-by-side --no-data' => /cannot be combined with --no-data/
+    }.each do |flags, message|
+      it "rejects #{flags}" do
+        expect { run_generator ['bases', *flags.split] }.to raise_error(ArgumentError, message)
+      end
+    end
+
+    it 'does not leave a definition or migration on validation failure' do
+      expect do
+        run_generator ['bases', '--side-by-side']
+      rescue ArgumentError => e
+        raise unless e.message.include?('requires --materialized')
+      end.not_to(change { Dir.glob(file('db/{views,migrate}/*')) })
+    end
+  end
+
+  context 'when side-by-side targets a schema-qualified materialized view' do
+    before do
+      ActiveRecord::Base.connection.execute('CREATE SCHEMA reporting')
+      Scenic::Adapters::Postgres.new.create_materialized_view('reporting.bases', "SELECT 'foo' AS bar")
+      FileUtils.mkpath(file('db/views'))
+      File.write(file('db/views/reporting_bases_v01.sql'), "SELECT 'foo' AS bar")
+    end
+
+    it 'rejects the unsupported Scenic update strategy' do
+      expect { run_generator ['reporting.bases', '--materialized', '--side-by-side'] }
+        .to raise_error(ArgumentError, /cannot update schema-qualified views/)
+    end
+
+    it 'leaves existing files untouched' do
+      expect do
+        run_generator ['reporting.bases', '--materialized', '--side-by-side']
+      rescue ArgumentError => e
+        raise unless e.message.include?('cannot update schema-qualified views')
+      end.not_to(change { Dir.glob(file('db/{views,migrate}/*')) })
+    end
   end
 
   context 'when updating an existing view that is dependent on other views' do

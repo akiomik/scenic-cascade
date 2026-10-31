@@ -4,12 +4,14 @@ module Scenic
       def self.source_root: (String?) -> void
       def migration_template: (String, String) -> void
       def destination_root: -> String
+      def options: -> Hash[Symbol, untyped]
 
       def create_view_definition: -> void
       def version: -> Integer
 
       private
 
+      def materialized?: -> bool
       def plural_name: -> String
       def plural_file_name: -> String
       def creating_new_view?: -> bool
