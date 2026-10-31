@@ -12,21 +12,61 @@ module Scenic
         source_root File.expand_path('templates', __dir__ || '.')
 
         def create_view_definition
+          @definition_path = nil
+          @original_definition = nil
           dependents unless destroying? || creating_new_view?
+          path = Scenic::Definition.new(plural_file_name, version).full_path.to_s
+          @definition_path = path
+          @original_definition = File.binread(path) if File.file?(path)
           super
+        rescue StandardError
+          restore_definition
+          raise
         end
 
         def create_migration_file
-          if creating_new_view? || destroying_initial_view?
-            migration_template('db/migrate/create_view.rb.erb',
-                               "db/migrate/create_#{plural_file_name}.rb")
-          else
-            migration_template('db/migrate/update_view.rb.erb',
-                               "db/migrate/update_#{plural_file_name}_to_version_#{version}.rb")
-          end
+          template, destination = migration_template_details
+          pattern = File.join(destination_root, 'db/migrate', "*_#{File.basename(destination)}")
+          original_migrations = Dir.glob(pattern).to_h { |path| [path, File.binread(path)] }
+          migration_template(template, destination)
+        rescue StandardError
+          restore_migrations(pattern, original_migrations) if pattern && original_migrations
+          restore_definition
+          raise
         end
 
         private
+
+        def migration_template_details
+          if creating_new_view? || destroying_initial_view?
+            ['db/migrate/create_view.rb.erb', "db/migrate/create_#{plural_file_name}.rb"]
+          else
+            ['db/migrate/update_view.rb.erb', "db/migrate/update_#{plural_file_name}_to_version_#{version}.rb"]
+          end
+        end
+
+        def restore_definition
+          path = @definition_path
+          return unless path
+
+          original = @original_definition
+          if original
+            restore_file(path, original)
+          elsif File.file?(path)
+            File.delete(path)
+          end
+        end
+
+        def restore_migrations(pattern, originals)
+          (Dir.glob(pattern) - originals.keys).each { |path| File.delete(path) }
+          originals.each { |path, content| restore_file(path, content) }
+        end
+
+        def restore_file(path, content)
+          return if File.file?(path) && File.binread(path) == content
+
+          File.binwrite(path, content)
+        end
 
         def dependents
           cached_dependents = @dependents

@@ -483,6 +483,118 @@ RSpec.describe Scenic::Generators::View::CascadeGenerator, size: :medium, type: 
     end
   end
 
+  context 'when migration generation fails after writing a definition' do
+    let(:existing_migration) { file('db/migrate/20260101000000_update_bases_to_version_2.rb') }
+
+    before do
+      create_view_with_definition('bases', "SELECT 'foo' AS bar")
+      FileUtils.mkpath(File.dirname(existing_migration))
+      File.write(existing_migration, '# existing migration')
+    end
+
+    context 'when the migration name collides' do
+      let(:collision_error) do
+        run_generator ['bases']
+      rescue Rails::Generators::Error => e
+        e
+      end
+
+      it 'reports the collision' do
+        expect(collision_error.message).to include('Another migration is already named')
+      end
+
+      it 'preserves the existing migration' do
+        collision_error
+        expect(File.read(existing_migration)).to eq('# existing migration')
+      end
+
+      it 'removes the new definition' do
+        collision_error
+        expect(file('db/views/bases_v02.sql')).not_to exist
+      end
+
+      it 'does not leave another migration' do
+        collision_error
+        expect(Dir.glob(file('db/migrate/*_update_bases_to_version_2.rb'))).to eq([existing_migration])
+      end
+    end
+
+    context 'when retried after resolving the migration collision' do
+      before do
+        begin
+          run_generator ['bases']
+        rescue Rails::Generators::Error => e
+          raise unless e.message.include?('Another migration is already named')
+        end
+        File.delete(existing_migration)
+        generator = described_class.new(['bases'], {}, destination_root: tempdir)
+        generator.shell.mute { generator.invoke_all }
+      end
+
+      it 'uses version two again' do
+        expect([file('db/views/bases_v02.sql'), file('db/views/bases_v03.sql')].map { |path| File.exist?(path) })
+          .to eq([true, false])
+      end
+
+      it 'reverts to version one' do
+        expect(file('db/migrate/update_bases_to_version_2.rb'))
+          .to contain_migration(:update_view, ':bases', version: 2, revert_to_version: 1)
+      end
+    end
+
+    context 'when template rendering leaves a partial migration' do
+      let(:template_error) do
+        generator = described_class.new(['bases'], {}, destination_root: tempdir)
+        allow(generator).to receive(:migration_template) do
+          File.write(existing_migration, '# overwritten migration')
+          File.write(file('db/migrate/20260101000001_update_bases_to_version_2.rb'), '# partial migration')
+          raise IOError, 'template failed'
+        end
+        generator.shell.mute { generator.invoke_all }
+      rescue IOError => e
+        e
+      end
+
+      it 'reports the template failure' do
+        expect(template_error.message).to eq('template failed')
+      end
+
+      it 'removes the new definition' do
+        template_error
+        expect(file('db/views/bases_v02.sql')).not_to exist
+      end
+
+      it 'removes only the partial migration' do
+        template_error
+        expect(Dir.glob(file('db/migrate/*_update_bases_to_version_2.rb'))).to eq([existing_migration])
+      end
+
+      it 'preserves the existing migration content' do
+        template_error
+        expect(File.read(existing_migration)).to eq('# existing migration')
+      end
+    end
+  end
+
+  context 'when revoking an update and migration generation fails' do
+    let(:definition) { file('db/views/bases_v02.sql') }
+
+    before do
+      create_view_with_definition('bases', "SELECT 'foo' AS bar")
+      File.write(definition, "SELECT 'bar' AS bar")
+      generator = described_class.new(['bases'], {}, destination_root: tempdir)
+      generator.behavior = :revoke
+      allow(generator).to receive(:migration_template).and_raise(IOError, 'template failed')
+      generator.shell.mute { generator.invoke_all }
+    rescue IOError => e
+      raise unless e.message == 'template failed'
+    end
+
+    it 'restores the preexisting definition' do
+      expect(File.read(definition)).to eq("SELECT 'bar' AS bar")
+    end
+  end
+
   context 'when destroying an update with an unmanaged dependent' do
     let(:migration) { file('db/migrate/20260101000000_update_bases_to_version_2.rb') }
 
