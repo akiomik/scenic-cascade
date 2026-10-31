@@ -6,14 +6,16 @@ module Scenic
   module Cascade
     # Represents a view with version
     class ViewWithVersion < Scenic::Cascade::View
-      attr_reader :version
+      attr_reader :version, :database_name
 
-      def initialize(name:, version:, materialized:)
+      def initialize(name:, version:, materialized:, database_name: name)
         super(name: name, materialized: materialized)
 
         raise TypeError unless version.is_a?(Integer)
+        raise TypeError unless database_name.is_a?(String)
 
         @version = version
+        @database_name = database_name
       end
 
       def ==(other)

@@ -11,6 +11,9 @@ module Scenic
 
         def dependents: -> Array[Scenic::Cascade::ViewWithVersion]
         def view_with_version_for: (Scenic::Cascade::Dependency) -> Scenic::Cascade::ViewWithVersion
+        def database_view_name: -> String
+        def definition_name_for: (String) -> String
+        def qualified_name: (String) -> String
       end
     end
   end

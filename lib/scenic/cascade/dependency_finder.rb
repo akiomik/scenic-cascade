@@ -14,21 +14,28 @@ module Scenic
       module ClassMethods
         DEPENDENCY_SQL = <<-SQL
              SELECT DISTINCT
-                    dependee.relname AS to
+                    CASE WHEN dependee_ns.nspname = 'public' THEN dependee.relname
+                         ELSE dependee_ns.nspname || '.' || dependee.relname END AS to
                   , dependee.relkind = 'm' AS to_materialized
-                  , depender.relname AS from
+                  , CASE WHEN depender_ns.nspname = 'public' THEN depender.relname
+                         ELSE depender_ns.nspname || '.' || depender.relname END AS from
                   , depender.relkind = 'm' AS from_materialized
+                  , format('%I.%I', dependee_ns.nspname, dependee.relname) AS to_lookup
                FROM pg_depend d
                JOIN pg_rewrite r
                  ON d.objid = r.oid
                JOIN pg_class AS dependee
                  ON d.refobjid = dependee.oid
+               JOIN pg_namespace AS dependee_ns
+                 ON dependee.relnamespace = dependee_ns.oid
                JOIN pg_class AS depender
                  ON r.ev_class = depender.oid
-              WHERE depender.relname = ?
-                AND dependee.relname != depender.relname
+               JOIN pg_namespace AS depender_ns
+                 ON depender.relnamespace = depender_ns.oid
+              WHERE depender.oid = to_regclass(?)
+                AND dependee.oid != depender.oid
                 AND dependee.relkind in ('m', 'v')
-           ORDER BY dependee.relname;
+           ORDER BY to_lookup;
         SQL
 
         private_constant :DEPENDENCY_SQL
@@ -41,8 +48,8 @@ module Scenic
           return [] if dependencies.empty?
           return dependencies unless recursive
 
-          dependencies.flat_map do |dependency|
-            [dependency, *view_dependencies_of(dependency.to.name, recursive: true)]
+          raw_dependencies.zip(dependencies).flat_map do |row, dependency|
+            [dependency, *view_dependencies_of(row.fetch('to_lookup'), recursive: true)]
           end
         end
       end

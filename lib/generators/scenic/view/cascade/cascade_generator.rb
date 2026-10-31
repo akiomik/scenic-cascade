@@ -32,8 +32,7 @@ module Scenic
           cached_dependents = @dependents
           return cached_dependents unless cached_dependents.nil?
 
-          view_name = "#{ActiveRecord::Base.table_name_prefix}#{plural_name}#{ActiveRecord::Base.table_name_suffix}"
-          deps = Scenic::Cascade.view_dependents_of(view_name, recursive: true)
+          deps = Scenic::Cascade.view_dependents_of(database_view_name, recursive: true)
           views = deps.map { |dep| view_with_version_for(dep) }
           # The last visit follows every prerequisite, even when names sort in the opposite order.
           @dependents = views.reverse.uniq { |view| [view.name, view.version, view.materialized?] }.reverse
@@ -41,11 +40,37 @@ module Scenic
 
         def view_with_version_for(dep)
           name = dep.from.name
-          definition = Scenic::Cascade.find_definitions_of(name).last
+          definition_name = definition_name_for(name)
+          definition = Scenic::Cascade.find_definitions_of(definition_name).last
           raise ArgumentError, "Dependent view #{name} has no Scenic definition file" if definition.nil?
 
-          version = definition.version.to_i
-          Scenic::Cascade::ViewWithVersion.new(name: name, version: version, materialized: dep.from.materialized?)
+          Scenic::Cascade::ViewWithVersion.new(
+            name: definition_name, version: definition.version.to_i,
+            materialized: dep.from.materialized?, database_name: qualified_name(name)
+          )
+        end
+
+        def definition_name_for(name)
+          return name if name.include?('.')
+
+          qualified = qualified_name(name)
+          return name unless Scenic::Cascade.find_definitions_of(qualified).any?
+
+          if Scenic::Cascade.find_definitions_of(name).any?
+            raise ArgumentError, "Dependent view #{name} has ambiguous Scenic definitions: #{name} and #{qualified}"
+          end
+
+          qualified
+        end
+
+        def qualified_name(name)
+          name.include?('.') ? name : "public.#{name}"
+        end
+
+        def database_view_name
+          return plural_name if plural_name.include?('.')
+
+          "#{ActiveRecord::Base.table_name_prefix}#{plural_name}#{ActiveRecord::Base.table_name_suffix}"
         end
       end
     end

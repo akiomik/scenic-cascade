@@ -1,32 +1,59 @@
 # frozen_string_literal: true
 
 class <%= migration_class_name %> < <%= activerecord_migration_class %>
-  <%- if dependents.any? -%>
+  <%- if dependents.any? || plural_name.include?('.') -%>
   class ExactViewName < String
     alias table_name to_s
   end
 
   <%- end -%>
+  <%- target_name = plural_name.include?('.') ? "ExactViewName.new(#{plural_name.inspect})" : formatted_plural_name -%>
   def change
   <%- dependents.reverse_each do |dep| -%>
-    drop_view ExactViewName.new(<%= dep.name.inspect %>),
+  <%- if dep.database_name == dep.name -%>
+    drop_view ExactViewName.new(<%= dep.database_name.inspect %>),
               revert_to_version: <%= dep.version %>,
               materialized: <%= dep.materialized? %>
+  <%- else -%>
+    reversible do |direction|
+      direction.up do
+        drop_view ExactViewName.new(<%= dep.database_name.inspect %>), materialized: <%= dep.materialized? %>
+      end
+      direction.down do
+        create_view ExactViewName.new(<%= dep.database_name.inspect %>),
+                    sql_definition: Scenic::Definition.new(<%= dep.name.inspect %>, <%= dep.version %>).to_sql,
+                    materialized: <%= dep.materialized? %>
+      end
+    end
+  <%- end -%>
   <%- end -%>
 
   <%- if materialized? -%>
-    update_view <%= formatted_plural_name %>,
+    update_view <%= target_name %>,
       version: <%= version %>,
       revert_to_version: <%= previous_version %>,
       materialized: <%= no_data? ? "{ no_data: true }" : true %>
   <%- else -%>
-    update_view <%= formatted_plural_name %>, version: <%= version %>, revert_to_version: <%= previous_version %>
+    update_view <%= target_name %>, version: <%= version %>, revert_to_version: <%= previous_version %>
   <%- end -%>
 
   <%- dependents.each do |dep| -%>
-    create_view ExactViewName.new(<%= dep.name.inspect %>),
+  <%- if dep.database_name == dep.name -%>
+    create_view ExactViewName.new(<%= dep.database_name.inspect %>),
                 version: <%= dep.version %>,
                 materialized: <%= dep.materialized? %>
+  <%- else -%>
+    reversible do |direction|
+      direction.up do
+        create_view ExactViewName.new(<%= dep.database_name.inspect %>),
+                    sql_definition: Scenic::Definition.new(<%= dep.name.inspect %>, <%= dep.version %>).to_sql,
+                    materialized: <%= dep.materialized? %>
+      end
+      direction.down do
+        drop_view ExactViewName.new(<%= dep.database_name.inspect %>), materialized: <%= dep.materialized? %>
+      end
+    end
+  <%- end -%>
   <%- end -%>
   end
 end
