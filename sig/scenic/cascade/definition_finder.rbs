@@ -7,7 +7,7 @@ module Scenic
 
         private
 
-        def go: (String, Integer) -> Array[Scenic::Definition]
+        def definition_at: (Pathname, String, String) -> Scenic::Definition?
       end
     end
   end
