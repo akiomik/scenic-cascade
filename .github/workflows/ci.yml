@@ -11,7 +11,11 @@ jobs:
   build:
     runs-on: ubuntu-latest
     name: Ruby ${{ matrix.ruby }}
+    permissions:
+      contents: read
+      id-token: write
     strategy:
+      fail-fast: false
       matrix:
         ruby:
           - '3.1'
@@ -56,8 +60,9 @@ jobs:
         POSTGRES_DB: testdb
         POSTGRES_USER: user
         POSTGRES_PASSWORD: password
-    - uses: codecov/codecov-action@v3
+    - uses: codecov/codecov-action@303a32d7a59b442fa8d48b6a1cc6825c09c847a5 # v7.1.1
       with:
-        token: ${{ secrets.CODECOV_TOKEN }}
+        use_oidc: true
+        fail_ci_if_error: ${{ github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository }}
         files: ./coverage/coverage.xml
         flags: unittests
