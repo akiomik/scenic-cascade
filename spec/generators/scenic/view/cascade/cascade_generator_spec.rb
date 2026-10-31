@@ -161,15 +161,57 @@ RSpec.describe Scenic::Generators::View::CascadeGenerator, size: :medium, type: 
     end
 
     it 'explains which dependent view lacks a definition' do
-      expect { run_generator ['bases'] }.to raise_error(ArgumentError, 'View unmanaged does not exist')
+      expect { run_generator ['bases'] }
+        .to raise_error(ArgumentError, 'Dependent view unmanaged has no Scenic definition file')
     end
 
     it 'does not leave an orphan definition or migration' do
       expect do
         run_generator ['bases']
       rescue ArgumentError => e
-        raise unless e.message == 'View unmanaged does not exist'
+        raise unless e.message == 'Dependent view unmanaged has no Scenic definition file'
       end.not_to(change { Dir.glob(file('db/{views,migrate}/*')) })
+    end
+
+    context 'when the missing definition is added after a failed attempt' do
+      before do
+        begin
+          run_generator ['bases']
+        rescue ArgumentError => e
+          raise unless e.message == 'Dependent view unmanaged has no Scenic definition file'
+        end
+        File.write(file('db/views/unmanaged_v01.sql'), 'SELECT * FROM bases')
+      end
+
+      it 'retries at version two with a fresh generator instance' do
+        described_class.new(['bases'], {}, destination_root: tempdir).invoke_all
+
+        generated = [File.exist?(file('db/views/bases_v02.sql')),
+                     File.exist?(file('db/views/bases_v03.sql')),
+                     Dir.glob(file('db/migrate/*_update_bases_to_version_2.rb')).size]
+        expect(generated).to eq([true, false, 1])
+      end
+    end
+  end
+
+  context 'when destroying an update with an unmanaged dependent' do
+    let(:migration) { file('db/migrate/20260101000000_update_bases_to_version_2.rb') }
+
+    before do
+      create_view_with_definition('bases', "SELECT 'foo' AS bar")
+      Scenic::Adapters::Postgres.new.create_view('unmanaged', 'SELECT * FROM bases')
+      File.write(file('db/views/bases_v02.sql'), "SELECT 'bar' AS bar")
+      FileUtils.mkpath(File.dirname(migration))
+      File.write(migration, '# generated migration')
+      run_generator ['bases'], behavior: :revoke
+    end
+
+    it 'removes the version two definition' do
+      expect(file('db/views/bases_v02.sql')).not_to exist
+    end
+
+    it 'removes the version two migration' do
+      expect(migration).not_to exist
     end
   end
 

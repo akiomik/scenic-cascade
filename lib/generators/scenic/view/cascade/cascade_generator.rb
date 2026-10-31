@@ -12,7 +12,7 @@ module Scenic
         source_root File.expand_path('templates', __dir__ || '.')
 
         def create_view_definition
-          dependents unless creating_new_view? || destroying_initial_view?
+          dependents unless destroying? || creating_new_view?
           super
         end
 
@@ -40,7 +40,11 @@ module Scenic
 
         def view_with_version_for(dep)
           name = dep.from.name
-          version = Scenic::Cascade.find_latest_definition_of(name).version.to_i
+          version = begin
+            Scenic::Cascade.find_latest_definition_of(name).version.to_i
+          rescue ArgumentError
+            raise ArgumentError, "Dependent view #{name} has no Scenic definition file"
+          end
           Scenic::Cascade::ViewWithVersion.new(name: name, version: version, materialized: dep.from.materialized?)
         end
       end
