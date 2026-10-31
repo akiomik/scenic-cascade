@@ -37,6 +37,10 @@ $ bin/rails generate scenic:view:cascade search_results
       create db/migrate/20220714233704_create_search_results.rb
 ```
 
+For a schema-qualified view, pass its database relation name, such as `reporting.orders`.
+If Rails uses a table name prefix, include it after the schema name (for example, `reporting.app_orders`).
+For unqualified names, pass the name without the prefix; Rails applies it in the migration.
+
 ## How it works
 
 Consider a situation where the following three views exist:

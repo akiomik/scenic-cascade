@@ -10,6 +10,7 @@ and this project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.ht
 ### Fixed
 
 - Recreate dependent views when generating a migration with a Rails table name prefix.
+- Discover and recreate dependent views across PostgreSQL schemas without mixing identically named views.
 
 ## [0.1.2] - 2026-11-01
 

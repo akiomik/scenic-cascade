@@ -8,8 +8,9 @@ module Scenic
 
     class ViewWithVersion < Scenic::Cascade::View
       attr_reader version: Integer
+      attr_reader database_name: String
 
-      def initialize: (name: String, version: Integer, materialized: bool) -> void
+      def initialize: (name: String, version: Integer, materialized: bool, ?database_name: String) -> void
 
       def ==: (_ViewWithVersionLike) -> bool
 

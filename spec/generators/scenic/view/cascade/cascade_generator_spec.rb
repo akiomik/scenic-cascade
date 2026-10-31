@@ -125,25 +125,27 @@ RSpec.describe Scenic::Generators::View::CascadeGenerator, size: :medium, type: 
 
     it 'drops alpha before updating firsts' do
       expect(migration).to contain_migration(
-        :drop_view, 'ExactViewName.new("alpha")', revert_to_version: 2, materialized: false
+        :drop_view, 'ExactViewName.new("public.alpha")', materialized: false
       )
     end
 
     it 'drops zeta before updating firsts' do
       expect(migration).to contain_migration(
-        :drop_view, 'ExactViewName.new("zeta")', revert_to_version: 3, materialized: true
+        :drop_view, 'ExactViewName.new("public.zeta")', materialized: true
       )
     end
 
     it 'recreates zeta from version three across the definition gap' do
       expect(migration).to contain_migration(
-        :create_view, 'ExactViewName.new("zeta")', version: 3, materialized: true
+        :create_view, 'ExactViewName.new("public.zeta")',
+        sql_definition: 'Scenic::Definition.new("zeta", 3).to_sql', materialized: true
       )
     end
 
     it 'recreates alpha after updating firsts' do
       expect(migration).to contain_migration(
-        :create_view, 'ExactViewName.new("alpha")', version: 2, materialized: false
+        :create_view, 'ExactViewName.new("public.alpha")',
+        sql_definition: 'Scenic::Definition.new("alpha", 2).to_sql', materialized: false
       )
     end
 
@@ -182,7 +184,8 @@ RSpec.describe Scenic::Generators::View::CascadeGenerator, size: :medium, type: 
 
     it 'recreates the dependent from its existing version three definition' do
       expect(migration).to contain_migration(
-        :create_view, 'ExactViewName.new("reports")', version: 3, materialized: false
+        :create_view, 'ExactViewName.new("public.reports")',
+        sql_definition: 'Scenic::Definition.new("reports", 3).to_sql', materialized: false
       )
     end
 
@@ -232,13 +235,14 @@ RSpec.describe Scenic::Generators::View::CascadeGenerator, size: :medium, type: 
 
     it 'drops the prefixed dependent using its database name' do
       expect(migration).to contain_migration(
-        :drop_view, 'ExactViewName.new("app_reports")', revert_to_version: 1, materialized: false
+        :drop_view, 'ExactViewName.new("public.app_reports")', materialized: false
       )
     end
 
     it 'recreates the unprefixed dependent using its database name' do
       expect(migration).to contain_migration(
-        :create_view, 'ExactViewName.new("legacy_reports")', version: 1, materialized: false
+        :create_view, 'ExactViewName.new("public.legacy_reports")',
+        sql_definition: 'Scenic::Definition.new("legacy_reports", 1).to_sql', materialized: false
       )
     end
 
@@ -248,6 +252,165 @@ RSpec.describe Scenic::Generators::View::CascadeGenerator, size: :medium, type: 
 
     it 'updates and restores the unprefixed dependent view' do
       expect_bases_round_trip('legacy_reports')
+    end
+  end
+
+  context 'when a schema-qualified view has dependents across schemas' do
+    let(:migration) { file('db/migrate/update_reporting_schema_bases_to_version_2.rb') }
+    let(:migration_instance) do
+      File.write(file('db/views/reporting_schema_bases_v02.sql'), "SELECT 'bar' AS bar")
+      load Dir.glob(file('db/migrate/*_update_reporting_schema_bases_to_version_2.rb')).fetch(0)
+      UpdateReportingSchemaBasesToVersion2.new
+    end
+    let(:round_trip_values) do
+      %i[up down].map do |direction|
+        migration_instance.migrate(direction)
+        [value_of('reporting.schema_reports'), value_of('cross_reports'), value_of('schema_reports')]
+      end
+    end
+
+    before do
+      ActiveRecord::Base.connection.execute('CREATE SCHEMA reporting')
+      create_view_with_definition('schema_bases', "SELECT 'public' AS bar")
+      create_view_with_definition('schema_reports', 'SELECT * FROM schema_bases')
+      create_view_with_definition('reporting.schema_bases', "SELECT 'foo' AS bar")
+      create_view_with_definition('reporting.schema_reports', 'SELECT * FROM reporting.schema_bases')
+      create_view_with_definition('cross_reports', 'SELECT * FROM reporting.schema_reports')
+      run_generator ['reporting.schema_bases']
+    end
+
+    after do
+      if Object.const_defined?(:UpdateReportingSchemaBasesToVersion2)
+        Object.send(:remove_const, :UpdateReportingSchemaBasesToVersion2)
+      end
+    end
+
+    it 'drops the qualified dependent' do
+      expect(migration).to contain_migration(
+        :drop_view, 'ExactViewName.new("reporting.schema_reports")', revert_to_version: 1, materialized: false
+      )
+    end
+
+    it 'does not drop an unrelated same-named view' do
+      expect(migration).not_to contain_migration(
+        :drop_view, 'ExactViewName.new("schema_reports")', revert_to_version: 1, materialized: false
+      )
+    end
+
+    it 'updates and restores dependents in both schemas' do
+      expect(round_trip_values).to eq([%w[bar bar public], %w[foo foo public]])
+    end
+  end
+
+  context 'when a qualified view name already includes the configured prefix' do
+    let(:migration_instance) do
+      File.write(file('db/views/reporting_app_bases_v02.sql'), "SELECT 'bar' AS bar")
+      load Dir.glob(file('db/migrate/*_update_reporting_app_bases_to_version_2.rb')).fetch(0)
+      UpdateReportingAppBasesToVersion2.new
+    end
+
+    around do |example|
+      original_prefix = ActiveRecord::Base.table_name_prefix
+      ActiveRecord::Base.table_name_prefix = 'app_'
+      example.run
+    ensure
+      ActiveRecord::Base.table_name_prefix = original_prefix
+    end
+
+    before do
+      ActiveRecord::Base.connection.execute('CREATE SCHEMA reporting')
+      create_view_with_definition('reporting.app_bases', "SELECT 'foo' AS bar")
+      create_view_with_definition('reporting.app_reports', 'SELECT * FROM reporting.app_bases')
+      run_generator ['reporting.app_bases']
+    end
+
+    after do
+      if Object.const_defined?(:UpdateReportingAppBasesToVersion2)
+        Object.send(:remove_const, :UpdateReportingAppBasesToVersion2)
+      end
+    end
+
+    it 'updates and restores the dependent view' do
+      migration_instance.migrate(:up)
+      updated = value_of('reporting.app_reports')
+      migration_instance.migrate(:down)
+      expect([updated, value_of('reporting.app_reports')]).to eq(%w[bar foo])
+    end
+  end
+
+  context 'when a schema-qualified view has no dependents' do
+    before do
+      ActiveRecord::Base.connection.execute('CREATE SCHEMA reporting')
+      create_view_with_definition('reporting.lonely_views', "SELECT 'foo' AS bar")
+      run_generator ['reporting.lonely_views']
+    end
+
+    it 'keeps the exact target name in the migration' do
+      path = Dir.glob(file('db/migrate/*_update_reporting_lonely_views_to_version_2.rb')).fetch(0)
+      snippets = ['class ExactViewName < String', 'update_view ExactViewName.new("reporting.lonely_views")']
+      expect(File.read(path)).to include(*snippets)
+    end
+  end
+
+  context 'when search_path resolves an unrelated same-named view first' do
+    let(:migration_instance) do
+      File.write(file('db/views/public_schema_bases_v02.sql'), "SELECT 'bar' AS bar")
+      load Dir.glob(file('db/migrate/*_update_public_schema_bases_to_version_2.rb')).fetch(0)
+      UpdatePublicSchemaBasesToVersion2.new
+    end
+    let(:round_trip_values) do
+      migration_instance.migrate(:up)
+      updated = [value_of('public.schema_reports'), value_of('public.explicit_reports'),
+                 value_of('reporting.schema_reports')]
+      migration_instance.migrate(:down)
+      restored = [value_of('public.schema_reports'), value_of('public.explicit_reports'),
+                  value_of('reporting.schema_reports')]
+      [updated, restored]
+    end
+
+    before do
+      ActiveRecord::Base.connection.execute('CREATE SCHEMA reporting')
+      create_view_with_definition('public.schema_bases', "SELECT 'foo' AS bar")
+      create_view_with_definition('schema_reports', 'SELECT * FROM public.schema_bases')
+      create_view_with_definition('public.explicit_reports', 'SELECT * FROM public.schema_bases')
+      create_view_with_definition('reporting.schema_bases', "SELECT 'other' AS bar")
+      create_view_with_definition('reporting.schema_reports', 'SELECT * FROM reporting.schema_bases')
+      ActiveRecord::Base.connection.execute('SET LOCAL search_path TO reporting, public')
+      run_generator ['public.schema_bases']
+    end
+
+    after do
+      if Object.const_defined?(:UpdatePublicSchemaBasesToVersion2)
+        Object.send(:remove_const, :UpdatePublicSchemaBasesToVersion2)
+      end
+    end
+
+    it 'updates public without touching the unrelated reporting view' do
+      expect(round_trip_values).to eq([%w[bar bar other], %w[foo foo other]])
+    end
+  end
+
+  context 'when public dependent definitions have ambiguous file names' do
+    before do
+      ActiveRecord::Base.connection.execute('CREATE SCHEMA reporting')
+      create_view_with_definition('public.schema_bases', "SELECT 'foo' AS bar")
+      create_view_with_definition('schema_reports', 'SELECT * FROM public.schema_bases')
+      create_view_with_definition('reporting.schema_reports', "SELECT 'other' AS bar")
+      File.write(file('db/views/public_schema_reports_v01.sql'), "SELECT 'unrelated' AS bar")
+      ActiveRecord::Base.connection.execute('SET LOCAL search_path TO reporting, public')
+    end
+
+    it 'explains why the public dependent cannot be resolved' do
+      expect { run_generator ['public.schema_bases'] }
+        .to raise_error(ArgumentError, /ambiguous Scenic definitions: schema_reports and public\.schema_reports/)
+    end
+
+    it 'does not write a definition or migration before rejecting the ambiguity' do
+      expect do
+        run_generator ['public.schema_bases']
+      rescue ArgumentError => e
+        raise unless e.message.include?('ambiguous Scenic definitions')
+      end.not_to(change { Dir.glob(file('db/{views,migrate}/*')) })
     end
   end
 
