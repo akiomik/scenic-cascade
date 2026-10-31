@@ -11,6 +11,9 @@ jobs:
   build:
     runs-on: ubuntu-latest
     name: Ruby ${{ matrix.ruby }}
+    permissions:
+      contents: read
+      id-token: write
     strategy:
       matrix:
         ruby:
@@ -50,8 +53,9 @@ jobs:
         POSTGRES_DB: testdb
         POSTGRES_USER: user
         POSTGRES_PASSWORD: password
-    - uses: codecov/codecov-action@v3
+    - uses: codecov/codecov-action@v7
       with:
-        token: ${{ secrets.CODECOV_TOKEN }}
+        use_oidc: true
+        fail_ci_if_error: true
         files: ./coverage/coverage.xml
         flags: unittests
