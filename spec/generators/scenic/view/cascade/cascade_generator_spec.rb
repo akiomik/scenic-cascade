@@ -67,6 +67,118 @@ RSpec.describe Scenic::Generators::View::CascadeGenerator, size: :medium, type: 
 
     it { expect(migration).to be_a_migration }
     it { expect(view_definition).to exist }
+
+    it 'uses update_view by default' do
+      expect(migration).to contain_migration(:update_view, ':search_results', version: 2, revert_to_version: 1)
+    end
+  end
+
+  context 'when replacing an existing view with a dependent' do
+    let(:migration) { file('db/migrate/update_bases_to_version_2.rb') }
+    let(:migration_sql) { File.read(Dir.glob(file('db/migrate/*_update_bases_to_version_2.rb')).fetch(0)) }
+
+    before do
+      create_view_with_definition('bases', "SELECT 'foo' AS bar")
+      create_view_with_definition('reports', 'SELECT * FROM bases')
+      run_generator ['bases', '--replace']
+    end
+
+    it 'uses replace_view for the target' do
+      expect(migration).to contain_migration(:replace_view, ':bases', version: 2, revert_to_version: 1)
+    end
+
+    it 'still drops and recreates the dependent view' do
+      expect(migration_sql).to include('drop_view ExactViewName.new("public.reports")',
+                                       'create_view ExactViewName.new("public.reports")')
+    end
+
+    it 'applies and reverses the generated migration' do
+      expect_bases_round_trip('reports')
+    end
+  end
+
+  context 'when updating a materialized view side by side' do
+    let(:migration) { file('db/migrate/update_bases_to_version_2.rb') }
+    let(:migration_sql) { File.read(Dir.glob(file('db/migrate/*_update_bases_to_version_2.rb')).fetch(0)) }
+
+    before do
+      Scenic::Adapters::Postgres.new.create_materialized_view('bases', "SELECT 'foo' AS bar")
+      FileUtils.mkpath(file('db/views'))
+      File.write(file('db/views/bases_v01.sql'), "SELECT 'foo' AS bar")
+      create_view_with_definition('reports', 'SELECT * FROM bases')
+      run_generator ['bases', '--materialized', '--side-by-side']
+    end
+
+    it 'passes the side-by-side option to update_view' do
+      expect(migration_sql).to include('materialized: { side_by_side: true }')
+    end
+
+    it 'still drops and recreates the dependent view' do
+      expect(migration_sql).to include('drop_view ExactViewName.new("public.reports")',
+                                       'create_view ExactViewName.new("public.reports")')
+    end
+
+    it 'applies and reverses the generated migration' do
+      expect_bases_round_trip('reports')
+    end
+  end
+
+  context 'when updating a materialized view without data' do
+    before do
+      Scenic::Adapters::Postgres.new.create_materialized_view('bases', "SELECT 'foo' AS bar")
+      FileUtils.mkpath(file('db/views'))
+      File.write(file('db/views/bases_v01.sql'), "SELECT 'foo' AS bar")
+      run_generator ['bases', '--materialized', '--no-data']
+    end
+
+    it 'retains the no-data option' do
+      migration = Dir.glob(file('db/migrate/*_update_bases_to_version_2.rb')).fetch(0)
+      expect(File.read(migration)).to include('materialized: { no_data: true }')
+    end
+  end
+
+  context 'when update options cannot be honored' do
+    before { create_view_with_definition('bases', "SELECT 'foo' AS bar") }
+
+    {
+      '--side-by-side' => /requires --materialized/,
+      '--materialized --replace' => /--replace cannot update a materialized view/,
+      '--materialized --side-by-side --no-data' => /cannot be combined with --no-data/
+    }.each do |flags, message|
+      it "rejects #{flags}" do
+        expect { run_generator ['bases', *flags.split] }.to raise_error(ArgumentError, message)
+      end
+    end
+
+    it 'does not leave a definition or migration on validation failure' do
+      expect do
+        run_generator ['bases', '--side-by-side']
+      rescue ArgumentError => e
+        raise unless e.message.include?('requires --materialized')
+      end.not_to(change { Dir.glob(file('db/{views,migrate}/*')) })
+    end
+  end
+
+  context 'when side-by-side targets a schema-qualified materialized view' do
+    before do
+      ActiveRecord::Base.connection.execute('CREATE SCHEMA reporting')
+      Scenic::Adapters::Postgres.new.create_materialized_view('reporting.bases', "SELECT 'foo' AS bar")
+      FileUtils.mkpath(file('db/views'))
+      File.write(file('db/views/reporting_bases_v01.sql'), "SELECT 'foo' AS bar")
+    end
+
+    it 'rejects the unsupported Scenic update strategy' do
+      expect { run_generator ['reporting.bases', '--materialized', '--side-by-side'] }
+        .to raise_error(ArgumentError, /cannot update schema-qualified views/)
+    end
+
+    it 'leaves existing files untouched' do
+      expect do
+        run_generator ['reporting.bases', '--materialized', '--side-by-side']
+      rescue ArgumentError => e
+        raise unless e.message.include?('cannot update schema-qualified views')
+      end.not_to(change { Dir.glob(file('db/{views,migrate}/*')) })
+    end
   end
 
   context 'when updating an existing view that is dependent on other views' do
@@ -480,6 +592,118 @@ RSpec.describe Scenic::Generators::View::CascadeGenerator, size: :medium, type: 
         expect(file('db/migrate/update_bases_to_version_2.rb'))
           .to contain_migration(:update_view, ':bases', version: 2, revert_to_version: 1)
       end
+    end
+  end
+
+  context 'when migration generation fails after writing a definition' do
+    let(:existing_migration) { file('db/migrate/20260101000000_update_bases_to_version_2.rb') }
+
+    before do
+      create_view_with_definition('bases', "SELECT 'foo' AS bar")
+      FileUtils.mkpath(File.dirname(existing_migration))
+      File.write(existing_migration, '# existing migration')
+    end
+
+    context 'when the migration name collides' do
+      let(:collision_error) do
+        run_generator ['bases']
+      rescue Rails::Generators::Error => e
+        e
+      end
+
+      it 'reports the collision' do
+        expect(collision_error.message).to include('Another migration is already named')
+      end
+
+      it 'preserves the existing migration' do
+        collision_error
+        expect(File.read(existing_migration)).to eq('# existing migration')
+      end
+
+      it 'removes the new definition' do
+        collision_error
+        expect(file('db/views/bases_v02.sql')).not_to exist
+      end
+
+      it 'does not leave another migration' do
+        collision_error
+        expect(Dir.glob(file('db/migrate/*_update_bases_to_version_2.rb'))).to eq([existing_migration])
+      end
+    end
+
+    context 'when retried after resolving the migration collision' do
+      before do
+        begin
+          run_generator ['bases']
+        rescue Rails::Generators::Error => e
+          raise unless e.message.include?('Another migration is already named')
+        end
+        File.delete(existing_migration)
+        generator = described_class.new(['bases'], {}, destination_root: tempdir)
+        generator.shell.mute { generator.invoke_all }
+      end
+
+      it 'uses version two again' do
+        expect([file('db/views/bases_v02.sql'), file('db/views/bases_v03.sql')].map { |path| File.exist?(path) })
+          .to eq([true, false])
+      end
+
+      it 'reverts to version one' do
+        expect(file('db/migrate/update_bases_to_version_2.rb'))
+          .to contain_migration(:update_view, ':bases', version: 2, revert_to_version: 1)
+      end
+    end
+
+    context 'when template rendering leaves a partial migration' do
+      let(:template_error) do
+        generator = described_class.new(['bases'], {}, destination_root: tempdir)
+        allow(generator).to receive(:migration_template) do
+          File.write(existing_migration, '# overwritten migration')
+          File.write(file('db/migrate/20260101000001_update_bases_to_version_2.rb'), '# partial migration')
+          raise IOError, 'template failed'
+        end
+        generator.shell.mute { generator.invoke_all }
+      rescue IOError => e
+        e
+      end
+
+      it 'reports the template failure' do
+        expect(template_error.message).to eq('template failed')
+      end
+
+      it 'removes the new definition' do
+        template_error
+        expect(file('db/views/bases_v02.sql')).not_to exist
+      end
+
+      it 'removes only the partial migration' do
+        template_error
+        expect(Dir.glob(file('db/migrate/*_update_bases_to_version_2.rb'))).to eq([existing_migration])
+      end
+
+      it 'preserves the existing migration content' do
+        template_error
+        expect(File.read(existing_migration)).to eq('# existing migration')
+      end
+    end
+  end
+
+  context 'when revoking an update and migration generation fails' do
+    let(:definition) { file('db/views/bases_v02.sql') }
+
+    before do
+      create_view_with_definition('bases', "SELECT 'foo' AS bar")
+      File.write(definition, "SELECT 'bar' AS bar")
+      generator = described_class.new(['bases'], {}, destination_root: tempdir)
+      generator.behavior = :revoke
+      allow(generator).to receive(:migration_template).and_raise(IOError, 'template failed')
+      generator.shell.mute { generator.invoke_all }
+    rescue IOError => e
+      raise unless e.message == 'template failed'
+    end
+
+    it 'restores the preexisting definition' do
+      expect(File.read(definition)).to eq("SELECT 'bar' AS bar")
     end
   end
 
