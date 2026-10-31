@@ -4,6 +4,7 @@ module Scenic
       def self.source_root: (String?) -> void
       def migration_template: (String, String) -> void
       def destination_root: -> String
+      def find_in_source_paths: (String) -> String
       def options: -> Hash[Symbol, untyped]
 
       def create_view_definition: -> void

@@ -688,6 +688,89 @@ RSpec.describe Scenic::Generators::View::CascadeGenerator, size: :medium, type: 
     end
   end
 
+  context 'when an existing migration is skipped' do
+    let(:existing_migration) { file('db/migrate/20260101000000_update_bases_to_version_2.rb') }
+
+    before do
+      create_view_with_definition('bases', "SELECT 'foo' AS bar")
+      FileUtils.mkpath(File.dirname(existing_migration))
+      File.write(existing_migration, '# existing migration')
+      generator = described_class.new(['bases'], { skip: true }, destination_root: tempdir)
+      generator.shell.mute { generator.invoke_all }
+    end
+
+    it 'does not leave a new definition' do
+      expect(file('db/views/bases_v02.sql')).not_to exist
+    end
+
+    it 'preserves the existing migration' do
+      expect(File.read(existing_migration)).to eq('# existing migration')
+    end
+
+    it 'does not create another migration' do
+      expect(Dir.glob(file('db/migrate/*_update_bases_to_version_2.rb'))).to eq([existing_migration])
+    end
+
+    context 'when retried after the collision is removed' do
+      before do
+        File.delete(existing_migration)
+        generator = described_class.new(['bases'], {}, destination_root: tempdir)
+        generator.shell.mute { generator.invoke_all }
+      end
+
+      it 'uses version two' do
+        expect([file('db/views/bases_v02.sql'), file('db/views/bases_v03.sql')].map { |path| File.exist?(path) })
+          .to eq([true, false])
+      end
+
+      it 'reverts to version one' do
+        expect(file('db/migrate/update_bases_to_version_2.rb'))
+          .to contain_migration(:update_view, ':bases', version: 2, revert_to_version: 1)
+      end
+    end
+  end
+
+  context 'when skip is requested without a migration collision' do
+    before do
+      create_view_with_definition('bases', "SELECT 'foo' AS bar")
+      generator = described_class.new(['bases'], { skip: true }, destination_root: tempdir)
+      generator.shell.mute { generator.invoke_all }
+    end
+
+    it 'creates the next definition' do
+      expect(file('db/views/bases_v02.sql')).to exist
+    end
+
+    it 'creates a matching migration' do
+      expect(file('db/migrate/update_bases_to_version_2.rb'))
+        .to contain_migration(:update_view, ':bases', version: 2, revert_to_version: 1)
+    end
+  end
+
+  context 'when an identical migration already exists but its definition is missing' do
+    before do
+      create_view_with_definition('bases', "SELECT 'foo' AS bar")
+      original = described_class.new(['bases'], {}, destination_root: tempdir)
+      original.shell.mute { original.invoke_all }
+      File.delete(file('db/views/bases_v02.sql'))
+      File.write(file('db/migrate/!_update_bases_to_version_2.rb'), '# unrelated file')
+      retry_generator = described_class.new(['bases'], { skip: true }, destination_root: tempdir)
+      retry_generator.shell.mute { retry_generator.invoke_all }
+    end
+
+    it 'restores the definition referenced by the existing migration' do
+      expect(file('db/views/bases_v02.sql')).to exist
+    end
+
+    it 'retains the existing migration' do
+      expect(Dir.glob(file('db/migrate/[0-9]*_update_bases_to_version_2.rb')).size).to eq(1)
+    end
+
+    it 'preserves the unrelated file' do
+      expect(File.read(file('db/migrate/!_update_bases_to_version_2.rb'))).to eq('# unrelated file')
+    end
+  end
+
   context 'when revoking an update and migration generation fails' do
     let(:definition) { file('db/views/bases_v02.sql') }
 
