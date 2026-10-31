@@ -170,6 +170,48 @@ RSpec.describe Scenic::Generators::View::CascadeGenerator, size: :medium, type: 
     end
   end
 
+  context 'when a dependent view has only a version three definition' do
+    let(:migration) { file('db/migrate/update_bases_to_version_2.rb') }
+
+    before do
+      create_view_with_definition('bases', "SELECT 'foo' AS bar")
+      Scenic::Adapters::Postgres.new.create_view('reports', 'SELECT * FROM bases')
+      File.write(file('db/views/reports_v03.sql'), 'SELECT * FROM bases')
+      run_generator ['bases']
+    end
+
+    it 'recreates the dependent from its existing version three definition' do
+      expect(migration).to contain_migration(
+        :create_view, 'ExactViewName.new("reports")', version: 3, materialized: false
+      )
+    end
+
+    it 'updates and restores the dependent view' do
+      expect_bases_round_trip('reports')
+    end
+  end
+
+  context 'when an existing database view has no Scenic definition yet' do
+    before do
+      Scenic::Adapters::Postgres.new.create_view('bases', "SELECT 'foo' AS bar")
+      Scenic::Adapters::Postgres.new.create_view('unmanaged', 'SELECT * FROM bases')
+      allow(Scenic::Cascade).to receive(:view_dependents_of)
+      run_generator ['bases']
+    end
+
+    it 'skips the dependency lookup for an initial definition' do
+      expect(Scenic::Cascade).not_to have_received(:view_dependents_of)
+    end
+
+    it 'creates the initial definition' do
+      expect(file('db/views/bases_v01.sql')).to exist
+    end
+
+    it 'creates an initial migration' do
+      expect(file('db/migrate/create_bases.rb')).to be_a_migration
+    end
+  end
+
   context 'when table_name_prefix is configured' do
     let(:migration) { file('db/migrate/update_bases_to_version_2.rb') }
 
@@ -236,7 +278,8 @@ RSpec.describe Scenic::Generators::View::CascadeGenerator, size: :medium, type: 
           raise unless e.message == 'Dependent view unmanaged has no Scenic definition file'
         end
         File.write(file('db/views/unmanaged_v01.sql'), 'SELECT * FROM bases')
-        described_class.new(['bases'], {}, destination_root: tempdir).invoke_all
+        generator = described_class.new(['bases'], {}, destination_root: tempdir)
+        generator.shell.mute { generator.invoke_all }
       end
 
       it 'retries at version two with a fresh generator instance' do
