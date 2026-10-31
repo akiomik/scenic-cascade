@@ -2,7 +2,8 @@
 sources:
   - name: ruby/gem_rbs_collection
     remote: https://github.com/ruby/gem_rbs_collection.git
-    # To refresh upstream signatures, update this SHA and run `bundle exec rbs collection install`.
+    # To refresh upstream signatures, update this SHA, then run:
+    # bundle exec rbs collection update && bundle exec rbs collection install
     revision: 9e17daa08b1710667699a208981cffd21dbf15f6
     repo_dir: gems
 
