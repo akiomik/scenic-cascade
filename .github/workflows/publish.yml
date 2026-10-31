@@ -1,9 +1,24 @@
 name: Publish gem
 on:
   release:
-    types: [published]
+    types: [released]
 jobs:
+  validate:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+    steps:
+      - uses: actions/checkout@v7
+      - id: version
+        name: Validate release tag
+        env:
+          RELEASE_TAG: ${{ github.event.release.tag_name }}
+        run: bash bin/release-version
+
   build:
+    needs: validate
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -14,10 +29,8 @@ jobs:
         with:
           ruby-version: 3.4
           bundler-cache: true
-      - id: version
-        run: |
-          version=$(echo ${{ github.event.release.tag_name }} | cut -c 2-)
-          echo "version=$version" >> "$GITHUB_OUTPUT"
       - run: gem build
       - uses: rubygems/configure-rubygems-credentials@dc5a8d8553e6ee01fc26761a49e99e733d17954a # v2.1.0
-      - run: gem push scenic-cascade-${{ steps.version.outputs.version }}.gem
+      - env:
+          GEM_VERSION: ${{ needs.validate.outputs.version }}
+        run: gem push "scenic-cascade-${GEM_VERSION}.gem"
