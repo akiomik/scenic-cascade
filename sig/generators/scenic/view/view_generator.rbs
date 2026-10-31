@@ -6,9 +6,12 @@ module Scenic
       def plural_file_name: -> String
       def migration_template: (String, String) -> void
 
+      def version: -> Integer
+
+      private
+
       def creating_new_view?: -> bool
       def destroying_initial_view?: -> bool
-      def version: -> String
     end
   end
 end
