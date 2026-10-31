@@ -40,6 +40,8 @@ $ bin/rails generate scenic:view:cascade search_results
 For a schema-qualified view, pass its database relation name, such as `reporting.orders`.
 If Rails uses a table name prefix, include it after the schema name (for example, `reporting.app_orders`).
 For unqualified names, pass the name without the prefix; Rails applies it in the migration.
+If another schema precedes `public` in PostgreSQL's `search_path` and contains a view with the same name,
+use a schema-qualified Scenic definition for the public dependent view (for example, `public_reports_v01.sql`).
 
 ## How it works
 
