@@ -6,10 +6,10 @@ workflows:
     '.github/workflows/ci.yml':
         - 'actions/checkout@v7.0.1'
         - 'codecov/codecov-action@v7.1.1'
-        - 'ruby/setup-ruby@v1.334.0'
+        - 'ruby/setup-ruby@v1.335.0'
     '.github/workflows/publish.yml':
         - 'actions/checkout@v7.0.1'
-        - 'ruby/setup-ruby@v1.334.0'
+        - 'ruby/setup-ruby@v1.335.0'
         - 'rubygems/configure-rubygems-credentials@v2.1.0'
     '.github/workflows/verify-lockfile.yml':
         - 'actions/checkout@v7.0.1'
@@ -31,9 +31,9 @@ dependencies:
         repo_id: 200299178
         uses:
             - 'actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd'
-    'ruby/setup-ruby@v1.334.0':
-        ref: 'v1.334.0'
-        commit: 'sha1-26e5b7d197ebf60545ee9667bcbace0be11ccaec'
+    'ruby/setup-ruby@v1.335.0':
+        ref: 'v1.335.0'
+        commit: 'sha1-7f797815d8adceb1c412e7abefdd1ab4abc47a5f'
         owner_id: 210414
         repo_id: 231208785
     'rubygems/configure-rubygems-credentials@v2.1.0':
