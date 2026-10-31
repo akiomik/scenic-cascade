@@ -40,11 +40,10 @@ module Scenic
 
         def view_with_version_for(dep)
           name = dep.from.name
-          version = begin
-            Scenic::Cascade.find_latest_definition_of(name).version.to_i
-          rescue ArgumentError
-            raise ArgumentError, "Dependent view #{name} has no Scenic definition file"
-          end
+          definition = Scenic::Cascade.find_definitions_of(name).last
+          raise ArgumentError, "Dependent view #{name} has no Scenic definition file" if definition.nil?
+
+          version = definition.version.to_i
           Scenic::Cascade::ViewWithVersion.new(name: name, version: version, materialized: dep.from.materialized?)
         end
       end
