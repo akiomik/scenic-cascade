@@ -18,6 +18,7 @@ module Scenic
         def restore_definition: -> void
         def restore_migrations: (String, Hash[String, String]) -> void
         def restore_file: (String, String) -> void
+        def skipped_migration?: (String, String, Hash[String, String]) -> bool
         def view_with_version_for: (Scenic::Cascade::Dependency) -> Scenic::Cascade::ViewWithVersion
         def database_view_name: -> String
         def definition_name_for: (String) -> String

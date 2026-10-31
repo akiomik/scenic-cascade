@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+require 'erb'
 require 'generators/scenic/view/view_generator'
 require 'scenic/cascade'
 require 'scenic/cascade/view_with_version'
@@ -26,9 +27,11 @@ module Scenic
 
         def create_migration_file
           template, destination = migration_template_details
-          pattern = File.join(destination_root, 'db/migrate', "*_#{File.basename(destination)}")
+          pattern = File.join(destination_root, 'db/migrate', "[0-9]*_#{File.basename(destination)}")
           original_migrations = Dir.glob(pattern).to_h { |path| [path, File.binread(path)] }
           migration_template(template, destination)
+          # Thor returns normally for --skip even though it did not create a migration.
+          restore_definition if options[:skip] && skipped_migration?(template, pattern, original_migrations)
         rescue StandardError
           restore_migrations(pattern, original_migrations) if pattern && original_migrations
           restore_definition
@@ -51,19 +54,16 @@ module Scenic
         end
 
         def migration_template_details
-          if creating_new_view? || destroying_initial_view?
-            ['db/migrate/create_view.rb.erb', "db/migrate/create_#{plural_file_name}.rb"]
-          else
-            ['db/migrate/update_view.rb.erb', "db/migrate/update_#{plural_file_name}_to_version_#{version}.rb"]
-          end
+          return ['db/migrate/create_view.rb.erb', "db/migrate/create_#{plural_file_name}.rb"] if
+            creating_new_view? || destroying_initial_view?
+
+          ['db/migrate/update_view.rb.erb', "db/migrate/update_#{plural_file_name}_to_version_#{version}.rb"]
         end
 
         def restore_definition
-          path = @definition_path
-          return unless path
+          return unless (path = @definition_path)
 
-          original = @original_definition
-          if original
+          if (original = @original_definition)
             restore_file(path, original)
           elsif File.file?(path)
             File.delete(path)
@@ -76,9 +76,13 @@ module Scenic
         end
 
         def restore_file(path, content)
-          return if File.file?(path) && File.binread(path) == content
+          File.binwrite(path, content) unless File.file?(path) && File.binread(path) == content
+        end
 
-          File.binwrite(path, content)
+        def skipped_migration?(template, pattern, originals)
+          return false unless Dir.glob(pattern).to_h { |path| [path, File.binread(path)] } == originals
+
+          originals.values.first != ERB.new(File.read(find_in_source_paths(template)), trim_mode: '-').result(binding).b
         end
 
         def dependents

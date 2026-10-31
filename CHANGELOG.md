@@ -13,6 +13,7 @@ and this project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.ht
 - Discover and recreate dependent views across PostgreSQL schemas without mixing identically named views or their SQL definitions.
 - Remove generated view definitions and partial migrations when migration generation fails, so retries use the correct version.
 - Apply `--replace` and supported `--side-by-side` options when generating view update migrations.
+- Avoid leaving an orphan SQL definition when `--skip` skips a conflicting migration.
 
 ## [0.1.2] - 2026-11-01
 
