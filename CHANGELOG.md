@@ -10,6 +10,7 @@ and this project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.ht
 ### Fixed
 
 - Select the latest existing dependent view definition when SQL version numbers have gaps.
+- Report noncanonical numeric view definition filenames instead of silently selecting an older definition.
 
 ## [0.1.1] - 2026-10-30
 
