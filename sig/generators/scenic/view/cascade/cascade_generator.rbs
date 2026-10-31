@@ -11,6 +11,8 @@ module Scenic
 
         private
 
+        def validate_update_options!: -> void
+        def validate_side_by_side_option!: -> void
         def dependents: -> Array[Scenic::Cascade::ViewWithVersion]
         def migration_template_details: -> [String, String]
         def restore_definition: -> void

@@ -8,6 +8,11 @@ class <%= migration_class_name %> < <%= activerecord_migration_class %>
 
   <%- end -%>
   <%- target_name = plural_name.include?('.') ? "ExactViewName.new(#{plural_name.inspect})" : formatted_plural_name -%>
+  <%- update_method = options[:replace] ? 'replace_view' : 'update_view' -%>
+  <%- materialized_flags = [] -%>
+  <%- materialized_flags << 'no_data: true' if options[:no_data] -%>
+  <%- materialized_flags << 'side_by_side: true' if options[:side_by_side] -%>
+  <%- materialized_options = materialized_flags.empty? ? 'true' : "{ #{materialized_flags.join(', ')} }" -%>
   def change
   <%- dependents.reverse_each do |dep| -%>
   <%- if dep.database_name == dep.name -%>
@@ -29,12 +34,12 @@ class <%= migration_class_name %> < <%= activerecord_migration_class %>
   <%- end -%>
 
   <%- if materialized? -%>
-    update_view <%= target_name %>,
+    <%= update_method %> <%= target_name %>,
       version: <%= version %>,
       revert_to_version: <%= previous_version %>,
-      materialized: <%= no_data? ? "{ no_data: true }" : true %>
+      materialized: <%= materialized_options %>
   <%- else -%>
-    update_view <%= target_name %>, version: <%= version %>, revert_to_version: <%= previous_version %>
+    <%= update_method %> <%= target_name %>, version: <%= version %>, revert_to_version: <%= previous_version %>
   <%- end -%>
 
   <%- dependents.each do |dep| -%>

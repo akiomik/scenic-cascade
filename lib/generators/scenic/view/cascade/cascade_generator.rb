@@ -12,8 +12,8 @@ module Scenic
         source_root File.expand_path('templates', __dir__ || '.')
 
         def create_view_definition
-          @definition_path = nil
-          @original_definition = nil
+          @definition_path = @original_definition = nil
+          validate_update_options! unless destroying? || creating_new_view?
           dependents unless destroying? || creating_new_view?
           path = Scenic::Definition.new(plural_file_name, version).full_path.to_s
           @definition_path = path
@@ -36,6 +36,19 @@ module Scenic
         end
 
         private
+
+        def validate_update_options!
+          raise ArgumentError, '--replace cannot update a materialized view' if options[:replace] && materialized?
+
+          validate_side_by_side_option! if options[:side_by_side]
+        end
+
+        def validate_side_by_side_option!
+          raise ArgumentError, '--side-by-side requires --materialized' unless materialized?
+          raise ArgumentError, '--side-by-side cannot update schema-qualified views' if plural_name.include?('.')
+
+          raise ArgumentError, '--side-by-side cannot be combined with --no-data' if options[:no_data]
+        end
 
         def migration_template_details
           if creating_new_view? || destroying_initial_view?
