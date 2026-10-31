@@ -7,6 +7,10 @@ and this project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.ht
 
 ## [Unreleased]
 
+### Fixed
+
+- Recreate dependent views when generating a migration with a Rails table name prefix.
+
 ## [0.1.2] - 2026-11-01
 
 ### Fixed

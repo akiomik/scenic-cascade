@@ -32,7 +32,8 @@ module Scenic
           cached_dependents = @dependents
           return cached_dependents unless cached_dependents.nil?
 
-          deps = Scenic::Cascade.view_dependents_of(plural_name, recursive: true)
+          view_name = "#{ActiveRecord::Base.table_name_prefix}#{plural_name}#{ActiveRecord::Base.table_name_suffix}"
+          deps = Scenic::Cascade.view_dependents_of(view_name, recursive: true)
           views = deps.map { |dep| view_with_version_for(dep) }
           # The last visit follows every prerequisite, even when names sort in the opposite order.
           @dependents = views.reverse.uniq { |view| [view.name, view.version, view.materialized?] }.reverse

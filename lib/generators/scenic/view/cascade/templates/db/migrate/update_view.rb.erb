@@ -1,9 +1,15 @@
 # frozen_string_literal: true
 
 class <%= migration_class_name %> < <%= activerecord_migration_class %>
+  <%- if dependents.any? -%>
+  class ExactViewName < String
+    alias table_name to_s
+  end
+
+  <%- end -%>
   def change
   <%- dependents.reverse_each do |dep| -%>
-    drop_view <%= dep.formatted_name %>,
+    drop_view ExactViewName.new(<%= dep.name.inspect %>),
               revert_to_version: <%= dep.version %>,
               materialized: <%= dep.materialized? %>
   <%- end -%>
@@ -18,7 +24,7 @@ class <%= migration_class_name %> < <%= activerecord_migration_class %>
   <%- end -%>
 
   <%- dependents.each do |dep| -%>
-    create_view <%= dep.formatted_name %>,
+    create_view ExactViewName.new(<%= dep.name.inspect %>),
                 version: <%= dep.version %>,
                 materialized: <%= dep.materialized? %>
   <%- end -%>
