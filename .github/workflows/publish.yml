@@ -9,31 +9,56 @@ jobs:
       contents: read
     outputs:
       version: ${{ steps.version.outputs.version }}
+      ruby_version: ${{ steps.ruby_version.outputs.version }}
     steps:
-      - uses: actions/checkout@v7.0.1
-      - uses: ruby/setup-ruby@v1.335.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          ruby-version: '3.4'
+          persist-credentials: false
+      - uses: ruby/setup-ruby@7f797815d8adceb1c412e7abefdd1ab4abc47a5f # v1.335.0
+        with:
+          bundler: none
       - id: version
         name: Validate release tag and gem version
         env:
           RELEASE_TAG: ${{ github.event.release.tag_name }}
         run: bash bin/release-version
+      - id: ruby_version
+        run: printf 'version=%s\n' "$(cat .ruby-version)" >> "$GITHUB_OUTPUT"
 
   build:
     needs: validate
     runs-on: ubuntu-latest
     permissions:
       contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: ruby/setup-ruby@7f797815d8adceb1c412e7abefdd1ab4abc47a5f # v1.335.0
+        with:
+          bundler: none
+      - run: gem build
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: gem
+          path: scenic-cascade-${{ needs.validate.outputs.version }}.gem
+          if-no-files-found: error
+
+  publish:
+    needs: [validate, build]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
       id-token: write
     steps:
-      - uses: actions/checkout@v7.0.1
-      - uses: ruby/setup-ruby@v1.335.0
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
-          ruby-version: 3.4
-          bundler-cache: true
-      - run: gem build
-      - uses: rubygems/configure-rubygems-credentials@v2.1.0
+          name: gem
+      - uses: ruby/setup-ruby@7f797815d8adceb1c412e7abefdd1ab4abc47a5f # v1.335.0
+        with:
+          ruby-version: ${{ needs.validate.outputs.ruby_version }}
+          bundler: none
+      - uses: rubygems/configure-rubygems-credentials@dc5a8d8553e6ee01fc26761a49e99e733d17954a # v2.1.0
       - env:
           GEM_VERSION: ${{ needs.validate.outputs.version }}
         run: gem push "scenic-cascade-${GEM_VERSION}.gem"
