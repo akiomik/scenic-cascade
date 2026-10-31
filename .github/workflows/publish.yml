@@ -15,9 +15,18 @@ jobs:
           ruby-version: 3.4
           bundler-cache: true
       - id: version
+        name: Validate release tag
+        env:
+          RELEASE_TAG: ${{ github.event.release.tag_name }}
         run: |
-          version=$(echo ${{ github.event.release.tag_name }} | cut -c 2-)
-          echo "version=$version" >> "$GITHUB_OUTPUT"
+          if [[ ! "$RELEASE_TAG" =~ ^v(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$ ]]; then
+            printf 'Invalid release tag: %s\n' "$RELEASE_TAG" >&2
+            exit 1
+          fi
+          version="${RELEASE_TAG#v}"
+          printf 'version=%s\n' "$version" >> "$GITHUB_OUTPUT"
       - run: gem build
       - uses: rubygems/configure-rubygems-credentials@dc5a8d8553e6ee01fc26761a49e99e733d17954a # v2.1.0
-      - run: gem push scenic-cascade-${{ steps.version.outputs.version }}.gem
+      - env:
+          GEM_VERSION: ${{ steps.version.outputs.version }}
+        run: gem push "scenic-cascade-${GEM_VERSION}.gem"
