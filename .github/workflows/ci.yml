@@ -54,9 +54,9 @@ jobs:
         POSTGRES_DB: testdb
         POSTGRES_USER: user
         POSTGRES_PASSWORD: password
-    - uses: codecov/codecov-action@v7
+    - uses: codecov/codecov-action@303a32d7a59b442fa8d48b6a1cc6825c09c847a5 # v7.1.1
       with:
         use_oidc: true
-        fail_ci_if_error: true
+        fail_ci_if_error: ${{ github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository }}
         files: ./coverage/coverage.xml
         flags: unittests
