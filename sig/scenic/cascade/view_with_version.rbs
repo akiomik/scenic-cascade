@@ -12,6 +12,10 @@ module Scenic
       def initialize: (name: String, version: Integer, materialized: bool) -> void
 
       def ==: (_ViewWithVersionLike) -> bool
+
+      private
+
+      def formatted_version: -> String
     end
   end
 end

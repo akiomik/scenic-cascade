@@ -39,7 +39,7 @@ jobs:
           --health-retries 5
 
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v7
     - name: Set up Ruby
       uses: ruby/setup-ruby@v1
       with:
@@ -47,6 +47,12 @@ jobs:
         bundler-cache: true
     - name: Run bin/setup
       run: bin/setup
+    - name: Check RBS collection lock
+      if: matrix.ruby == '3.4'
+      run: |
+        bundle exec rbs collection update
+        bundle exec rbs collection install
+        git diff --exit-code -- rbs_collection.lock.yaml
     - name: Run the default task
       run: bundle exec rake
       env:
