@@ -11,6 +11,11 @@ module Scenic
       class CascadeGenerator < Scenic::Generators::ViewGenerator
         source_root File.expand_path('templates', __dir__ || '.')
 
+        def create_view_definition
+          dependents unless destroying? || creating_new_view?
+          super
+        end
+
         def create_migration_file
           if creating_new_view? || destroying_initial_view?
             migration_template('db/migrate/create_view.rb.erb',
@@ -35,7 +40,10 @@ module Scenic
 
         def view_with_version_for(dep)
           name = dep.from.name
-          version = Scenic::Cascade.find_latest_definition_of(name).version.to_i
+          definition = Scenic::Cascade.find_definitions_of(name).last
+          raise ArgumentError, "Dependent view #{name} has no Scenic definition file" if definition.nil?
+
+          version = definition.version.to_i
           Scenic::Cascade::ViewWithVersion.new(name: name, version: version, materialized: dep.from.materialized?)
         end
       end

@@ -154,6 +154,91 @@ RSpec.describe Scenic::Generators::View::CascadeGenerator, size: :medium, type: 
     end
   end
 
+  context 'when a dependent view has no definition file' do
+    before do
+      create_view_with_definition('bases', "SELECT 'foo' AS bar")
+      Scenic::Adapters::Postgres.new.create_view('unmanaged', 'SELECT * FROM bases')
+    end
+
+    it 'explains which dependent view lacks a definition' do
+      expect { run_generator ['bases'] }
+        .to raise_error(ArgumentError, 'Dependent view unmanaged has no Scenic definition file')
+    end
+
+    it 'does not leave an orphan definition or migration' do
+      expect do
+        run_generator ['bases']
+      rescue ArgumentError => e
+        raise unless e.message == 'Dependent view unmanaged has no Scenic definition file'
+      end.not_to(change { Dir.glob(file('db/{views,migrate}/*')) })
+    end
+
+    context 'when the missing definition is added after a failed attempt' do
+      before do
+        begin
+          run_generator ['bases']
+        rescue ArgumentError => e
+          raise unless e.message == 'Dependent view unmanaged has no Scenic definition file'
+        end
+        File.write(file('db/views/unmanaged_v01.sql'), 'SELECT * FROM bases')
+        described_class.new(['bases'], {}, destination_root: tempdir).invoke_all
+      end
+
+      it 'retries at version two with a fresh generator instance' do
+        generated = [File.exist?(file('db/views/bases_v02.sql')),
+                     File.exist?(file('db/views/bases_v03.sql')),
+                     Dir.glob(file('db/migrate/*_update_bases_to_version_2.rb')).size]
+        expect(generated).to eq([true, false, 1])
+      end
+
+      it 'reverts to the version before the failed attempt' do
+        expect(file('db/migrate/update_bases_to_version_2.rb'))
+          .to contain_migration(:update_view, ':bases', version: 2, revert_to_version: 1)
+      end
+    end
+  end
+
+  context 'when destroying an update with an unmanaged dependent' do
+    let(:migration) { file('db/migrate/20260101000000_update_bases_to_version_2.rb') }
+
+    before do
+      create_view_with_definition('bases', "SELECT 'foo' AS bar")
+      Scenic::Adapters::Postgres.new.create_view('unmanaged', 'SELECT * FROM bases')
+      File.write(file('db/views/bases_v02.sql'), "SELECT 'bar' AS bar")
+      FileUtils.mkpath(File.dirname(migration))
+      File.write(migration, '# generated migration')
+      run_generator ['bases'], behavior: :revoke
+    end
+
+    it 'removes the version two definition' do
+      expect(file('db/views/bases_v02.sql')).not_to exist
+    end
+
+    it 'removes the version two migration' do
+      expect(migration).not_to exist
+    end
+  end
+
+  context 'when a dependent definition has a noncanonical filename' do
+    before do
+      create_view_with_definition('bases', "SELECT 'foo' AS bar")
+      Scenic::Adapters::Postgres.new.create_view('unmanaged', 'SELECT * FROM bases')
+      File.write(file('db/views/unmanaged_v3.sql'), 'SELECT * FROM bases')
+    end
+
+    it 'reports the invalid filename' do
+      expect { run_generator ['bases'] }.to raise_error(ArgumentError, /Noncanonical view definition/)
+    end
+
+    it 'does not leave an orphan definition or migration' do
+      expect do
+        run_generator ['bases']
+      rescue ArgumentError => e
+        raise unless e.message.include?('Noncanonical view definition')
+      end.not_to(change { Dir.glob(file('db/{views,migrate}/*')) })
+    end
+  end
+
   context 'when dependency paths converge' do
     before do
       create_view_with_definition('bases', "SELECT 'foo' AS bar")
