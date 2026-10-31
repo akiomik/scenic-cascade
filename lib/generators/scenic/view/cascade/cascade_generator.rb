@@ -11,6 +11,11 @@ module Scenic
       class CascadeGenerator < Scenic::Generators::ViewGenerator
         source_root File.expand_path('templates', __dir__ || '.')
 
+        def create_view_definition
+          dependents unless creating_new_view? || destroying_initial_view?
+          super
+        end
+
         def create_migration_file
           if creating_new_view? || destroying_initial_view?
             migration_template('db/migrate/create_view.rb.erb',

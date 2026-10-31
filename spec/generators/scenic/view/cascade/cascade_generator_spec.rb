@@ -154,6 +154,25 @@ RSpec.describe Scenic::Generators::View::CascadeGenerator, size: :medium, type: 
     end
   end
 
+  context 'when a dependent view has no definition file' do
+    before do
+      create_view_with_definition('bases', "SELECT 'foo' AS bar")
+      Scenic::Adapters::Postgres.new.create_view('unmanaged', 'SELECT * FROM bases')
+    end
+
+    it 'explains which dependent view lacks a definition' do
+      expect { run_generator ['bases'] }.to raise_error(ArgumentError, 'View unmanaged does not exist')
+    end
+
+    it 'does not leave an orphan definition or migration' do
+      expect do
+        run_generator ['bases']
+      rescue ArgumentError => e
+        raise unless e.message == 'View unmanaged does not exist'
+      end.not_to(change { Dir.glob(file('db/{views,migrate}/*')) })
+    end
+  end
+
   context 'when dependency paths converge' do
     before do
       create_view_with_definition('bases', "SELECT 'foo' AS bar")

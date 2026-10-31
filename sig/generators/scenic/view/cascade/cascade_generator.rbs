@@ -4,6 +4,7 @@ module Scenic
       class CascadeGenerator < Scenic::Generators::ViewGenerator
         @dependents: Array[Scenic::Cascade::ViewWithVersion]?
 
+        def create_view_definition: -> void
         def create_migration_file: -> void
 
         private
