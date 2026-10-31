@@ -1,6 +1,9 @@
 # frozen_string_literal: true
 
-target :lib
+target :lib do
+  signature 'sig'
+  check 'lib'
+end
 
 # target :test do
 #   signature "sig", "sig-private"
