@@ -1,0 +1,3 @@
+# Release version changes are metadata and do not exercise application behavior.
+ignore:
+  - '^lib/scenic/cascade/version\.rb$'
