@@ -3,6 +3,7 @@ module Scenic
     class ViewGenerator
       def self.source_root: (String?) -> void
       def migration_template: (String, String) -> void
+      def destination_root: -> String
 
       def create_view_definition: -> void
       def version: -> Integer

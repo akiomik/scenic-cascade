@@ -3,6 +3,8 @@ module Scenic
     module View
       class CascadeGenerator < Scenic::Generators::ViewGenerator
         @dependents: Array[Scenic::Cascade::ViewWithVersion]?
+        @definition_path: String?
+        @original_definition: String?
 
         def create_view_definition: -> void
         def create_migration_file: -> void
@@ -10,6 +12,10 @@ module Scenic
         private
 
         def dependents: -> Array[Scenic::Cascade::ViewWithVersion]
+        def migration_template_details: -> [String, String]
+        def restore_definition: -> void
+        def restore_migrations: (String, Hash[String, String]) -> void
+        def restore_file: (String, String) -> void
         def view_with_version_for: (Scenic::Cascade::Dependency) -> Scenic::Cascade::ViewWithVersion
         def database_view_name: -> String
         def definition_name_for: (String) -> String
