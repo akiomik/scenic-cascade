@@ -8,7 +8,8 @@ gemspec
 gem 'rake', '~> 13.0'
 
 # type checking
-gem 'steep', require: false
+# Steep 2.x drops Ruby 3.1, which remains in the CI matrix.
+gem 'steep', '~> 1.10', require: false
 
 # testing
 gem 'activerecord', '~> 7.1.0'

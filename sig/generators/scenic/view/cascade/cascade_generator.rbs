@@ -2,11 +2,14 @@ module Scenic
   module Generators
     module View
       class CascadeGenerator < Scenic::Generators::ViewGenerator
+        @dependents: Array[Scenic::Cascade::ViewWithVersion]?
+
         def create_migration_file: -> void
 
         private
 
         def dependents: -> Array[Scenic::Cascade::ViewWithVersion]
+        def view_with_version_for: (Scenic::Cascade::Dependency) -> Scenic::Cascade::ViewWithVersion
       end
     end
   end

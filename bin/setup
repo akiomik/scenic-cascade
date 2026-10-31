@@ -5,4 +5,4 @@ set -vx
 
 bundle install
 rm -rf .gem_rbs_collection
-bundle exec rbs collection install
+bundle exec rbs collection install --frozen
