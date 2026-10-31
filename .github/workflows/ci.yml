@@ -15,6 +15,7 @@ jobs:
       contents: read
       id-token: write
     strategy:
+      fail-fast: false
       matrix:
         ruby:
           - '3.1'
