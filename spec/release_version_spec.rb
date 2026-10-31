@@ -3,6 +3,7 @@
 require 'fileutils'
 require 'open3'
 require 'tempfile'
+require_relative '../lib/scenic/cascade/version'
 
 # The executable has no Ruby class to describe.
 # rubocop:disable RSpec/DescribeClass
@@ -21,13 +22,16 @@ RSpec.describe 'release-version', size: :small do
   end
 
   it 'outputs the version for a canonical release tag' do
-    _stdout, _stderr, status = validate('v0.1.2')
-    expect([status.success?, File.read(output.path)]).to eq([true, "version=0.1.2\n"])
+    _stdout, _stderr, status = validate("v#{Scenic::Cascade::VERSION}")
+    expect([status.success?, File.read(output.path)]).to eq([true, "version=#{Scenic::Cascade::VERSION}\n"])
   end
 
-  it 'accepts multiple-digit version components' do
-    _stdout, _stderr, status = validate('v12.34.56')
-    expect([status.success?, File.read(output.path)]).to eq([true, "version=12.34.56\n"])
+  it 'rejects a valid tag that differs from the gem version' do
+    tag = "v#{Scenic::Cascade::VERSION.split('.').first.to_i + 1}.0.0"
+    _stdout, stderr, status = validate(tag)
+    expect([status.success?, File.size(output.path), stderr]).to eq(
+      [false, 0, "Release tag #{tag} does not match gem version #{Scenic::Cascade::VERSION}\n"]
+    )
   end
 
   %w[v01.2.3 v1.2.3.4 v1.2.3.rc1 1.2.3].each do |tag|

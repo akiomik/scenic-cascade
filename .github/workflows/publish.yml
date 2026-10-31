@@ -11,8 +11,11 @@ jobs:
       version: ${{ steps.version.outputs.version }}
     steps:
       - uses: actions/checkout@v7.0.1
+      - uses: ruby/setup-ruby@v1.335.0
+        with:
+          ruby-version: '3.4'
       - id: version
-        name: Validate release tag
+        name: Validate release tag and gem version
         env:
           RELEASE_TAG: ${{ github.event.release.tag_name }}
         run: bash bin/release-version
