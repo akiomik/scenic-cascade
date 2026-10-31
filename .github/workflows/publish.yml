@@ -10,7 +10,7 @@ jobs:
     outputs:
       version: ${{ steps.version.outputs.version }}
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@v7.0.1
       - id: version
         name: Validate release tag
         env:
@@ -24,13 +24,13 @@ jobs:
       contents: read
       id-token: write
     steps:
-      - uses: actions/checkout@v7
-      - uses: ruby/setup-ruby@v1
+      - uses: actions/checkout@v7.0.1
+      - uses: ruby/setup-ruby@v1.334.0
         with:
           ruby-version: 3.4
           bundler-cache: true
       - run: gem build
-      - uses: rubygems/configure-rubygems-credentials@dc5a8d8553e6ee01fc26761a49e99e733d17954a # v2.1.0
+      - uses: rubygems/configure-rubygems-credentials@v2.1.0
       - env:
           GEM_VERSION: ${{ needs.validate.outputs.version }}
         run: gem push "scenic-cascade-${GEM_VERSION}.gem"

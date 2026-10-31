@@ -13,7 +13,7 @@ jobs:
     permissions:
       contents: read
     steps:
-    - uses: actions/checkout@v7
+    - uses: actions/checkout@v7.0.1
     - name: Install actionlint
       run: |
         curl --fail --location --silent --show-error \
@@ -57,9 +57,9 @@ jobs:
           --health-retries 5
 
     steps:
-    - uses: actions/checkout@v7
+    - uses: actions/checkout@v7.0.1
     - name: Set up Ruby
-      uses: ruby/setup-ruby@v1
+      uses: ruby/setup-ruby@v1.334.0
       with:
         ruby-version: ${{ matrix.ruby }}
         bundler-cache: true
@@ -78,7 +78,7 @@ jobs:
         POSTGRES_DB: testdb
         POSTGRES_USER: user
         POSTGRES_PASSWORD: password
-    - uses: codecov/codecov-action@303a32d7a59b442fa8d48b6a1cc6825c09c847a5 # v7.1.1
+    - uses: codecov/codecov-action@v7.1.1
       with:
         use_oidc: true
         fail_ci_if_error: ${{ github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository }}
