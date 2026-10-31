@@ -12,3 +12,4 @@
 
 log/
 /.gem_rbs_collection/
+.*.md
