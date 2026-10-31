@@ -14,7 +14,13 @@ module Scenic
       # Provides class methods to injected class
       module ClassMethods
         def find_definitions_of(view_name)
-          go(view_name, 1)
+          first_path = Scenic::Definition.new(view_name, 1).full_path
+          directory = first_path.dirname
+          return [] unless directory.directory?
+
+          prefix = first_path.basename.to_s.sub(/\d+\.sql\z/, '')
+          directory.children.map { |path| definition_at(path, view_name, prefix) }
+                   .compact.sort_by { |definition| definition.version.to_i }
         end
 
         def find_latest_definition_of(view_name)
@@ -29,11 +35,14 @@ module Scenic
 
         private
 
-        def go(view_name, version)
-          definition = Scenic::Definition.new(view_name, version)
-          return [] unless File.exist?(definition.full_path)
+        def definition_at(path, view_name, prefix)
+          return unless path.file?
 
-          [definition, *go(view_name, version + 1)]
+          match = /\A#{Regexp.escape(prefix)}(?<version>\d+)\.sql\z/.match(path.basename.to_s)
+          return unless match && match[:version].to_i.positive?
+
+          definition = Scenic::Definition.new(view_name, match[:version].to_i)
+          definition if definition.full_path == path
         end
       end
     end

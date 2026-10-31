@@ -7,6 +7,10 @@ and this project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.ht
 
 ## [Unreleased]
 
+### Fixed
+
+- Select the latest existing dependent view definition when SQL version numbers have gaps.
+
 ## [0.1.1] - 2026-10-30
 
 ### Fixed
