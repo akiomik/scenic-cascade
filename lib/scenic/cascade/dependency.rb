@@ -30,7 +30,7 @@ module Scenic
       def self.from_hash(hash)
         from = Scenic::Cascade::View.new(name: hash['from'], materialized: hash['from_materialized'])
         to = Scenic::Cascade::View.new(name: hash['to'], materialized: hash['to_materialized'])
-        new(from: from, to: to)
+        new(from:, to:)
       end
     end
   end

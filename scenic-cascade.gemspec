@@ -11,8 +11,7 @@ Gem::Specification.new do |spec|
   spec.summary = 'A migration scenic file generator that supports cascading view updates'
   spec.description = spec.summary # TODO
   spec.homepage = 'https://github.com/akiomik/scenic-cascade'
-  # The RuboCop target is updated in the next stacked PR.
-  spec.required_ruby_version = '>= 3.3.0' # rubocop:disable Gemspec/RequiredRubyVersion
+  spec.required_ruby_version = '>= 3.3.0'
   spec.licenses = ['Apache-2.0']
 
   spec.metadata['homepage_uri'] = spec.homepage

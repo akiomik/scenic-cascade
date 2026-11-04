@@ -19,8 +19,8 @@ module Scenic
           return [] unless directory.directory?
 
           prefix = first_path.basename.to_s.sub(/\d+\.sql\z/, '')
-          directory.children.map { |path| definition_at(path, view_name, prefix) }
-                   .compact.sort_by { |definition| definition.version.to_i }
+          directory.children.filter_map { |path| definition_at(path, view_name, prefix) }
+                   .sort_by { |definition| definition.version.to_i }
         end
 
         def find_latest_definition_of(view_name)

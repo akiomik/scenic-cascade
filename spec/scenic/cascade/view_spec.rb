@@ -15,14 +15,14 @@ end
 
 RSpec.describe Scenic::Cascade::View, size: :small do
   describe '.new' do
-    subject(:new) { described_class.new(name: name, materialized: materialized) }
+    subject(:new) { described_class.new(name:, materialized:) }
 
     context 'when parameters is valid' do
       let(:name) { 'view1' }
       let(:materialized) { false }
 
       it { expect { new }.not_to raise_error }
-      it { is_expected.to have_attributes(name: name, materialized?: materialized) }
+      it { is_expected.to have_attributes(name:, materialized?: materialized) }
     end
 
     context 'when name is nil' do
@@ -43,7 +43,7 @@ RSpec.describe Scenic::Cascade::View, size: :small do
   describe '#formatted_name' do
     subject { view.formatted_name }
 
-    let(:view) { described_class.new(name: name, materialized: true) }
+    let(:view) { described_class.new(name:, materialized: true) }
 
     context 'when "." is included in name' do
       let(:name) { 'database.view' }
@@ -63,7 +63,7 @@ RSpec.describe Scenic::Cascade::View, size: :small do
 
     let(:name) { 'view1' }
     let(:materialized) { false }
-    let(:this) { described_class.new(name: name, materialized: materialized) }
+    let(:this) { described_class.new(name:, materialized:) }
 
     context 'when that is the same instance' do
       let(:that) { this }
@@ -72,25 +72,25 @@ RSpec.describe Scenic::Cascade::View, size: :small do
     end
 
     context 'when that has the same values' do
-      let(:that) { described_class.new(name: name, materialized: materialized) }
+      let(:that) { described_class.new(name:, materialized:) }
 
       it { is_expected.to be true }
     end
 
     context 'when that is not a View but has the same values' do
-      let(:that) { ViewLike.new(name: name, materialized: materialized) }
+      let(:that) { ViewLike.new(name:, materialized:) }
 
       it { is_expected.to be true }
     end
 
     context 'when that has defferent `name`' do
-      let(:that) { described_class.new(name: 'view2', materialized: materialized) }
+      let(:that) { described_class.new(name: 'view2', materialized:) }
 
       it { is_expected.to be false }
     end
 
     context 'when that has defferent `materialized`' do
-      let(:that) { described_class.new(name: name, materialized: true) }
+      let(:that) { described_class.new(name:, materialized: true) }
 
       it { is_expected.to be false }
     end
@@ -99,7 +99,7 @@ RSpec.describe Scenic::Cascade::View, size: :small do
   describe '.to_s' do
     subject { view.to_s }
 
-    let(:view) { described_class.new(name: 'view1', materialized: materialized) }
+    let(:view) { described_class.new(name: 'view1', materialized:) }
 
     context 'when materialized' do
       let(:materialized) { true }
