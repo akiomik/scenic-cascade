@@ -26,9 +26,9 @@ Or install it yourself as:
 $ gem install scenic-cascade
 ```
 
-The 0.2.x series requires Ruby 3.3 or newer. Applications on older Ruby versions can remain on
+Since v0.2.0, Ruby 3.3 or newer is required. Applications on older Ruby versions can remain on
 `scenic-cascade` 0.1.x; v0.1.5 retains the previous gem requirement. Rails 7.1 and 7.2 remain in the test matrix.
-Scenic 1.6 or newer is required for supported generator options and migration rollback.
+Since v0.3.0, Scenic 1.6 or newer is required for supported generator options and migration rollback.
 
 ## Usage
 
