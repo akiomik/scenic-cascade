@@ -1,14 +1,22 @@
 # frozen_string_literal: true
 
 require 'rubygems/package'
+require 'fileutils'
+require 'open3'
 require 'tmpdir'
 
 RSpec.describe Gem::Package, size: :small do
   let(:files) do
-    specification = Gem::Specification.load('scenic-cascade.gemspec')
     Dir.mktmpdir do |directory|
-      gem_file = File.join(directory, "scenic-cascade-#{specification.version}.gem")
-      described_class.build(specification, false, false, gem_file)
+      %w[lib sig README.md CHANGELOG.md LICENSE scenic-cascade.gemspec
+         .env Gemfile Gemfile.lock Dockerfile rbs_collection.lock.yaml].each do |path|
+        FileUtils.cp_r(path, directory)
+      end
+
+      output, error, status = Open3.capture3('gem', 'build', 'scenic-cascade.gemspec', chdir: directory)
+      raise "gem build failed: #{output}\n#{error}" unless status.success?
+
+      gem_file = Dir.glob(File.join(directory, 'scenic-cascade-*.gem')).fetch(0)
       described_class.new(gem_file).contents
     end
   end
