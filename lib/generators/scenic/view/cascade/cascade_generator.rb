@@ -23,8 +23,7 @@ module Scenic
 
         def create_view_definition
           @definition_path = @original_definition = nil
-          validate_update_options! unless destroying? || creating_new_view?
-          dependents unless destroying? || creating_new_view?
+          preflight_update! unless destroying? || creating_new_view?
           path = Scenic::Definition.new(plural_file_name, version).full_path.to_s
           @definition_path = path
           @original_definition = File.binread(path) if File.file?(path)
@@ -48,6 +47,11 @@ module Scenic
         end
 
         private
+
+        def preflight_update!
+          validate_update_options!
+          dependents
+        end
 
         def validate_update_options!
           raise ArgumentError, '--replace cannot update a materialized view' if options[:replace] && materialized?
