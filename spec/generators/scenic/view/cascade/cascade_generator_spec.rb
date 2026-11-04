@@ -16,6 +16,13 @@ RSpec.describe Scenic::Generators::View::CascadeGenerator, size: :medium, type: 
     File.write(path, sql)
   end
 
+  def create_materialized_view_with_definition(name, sql)
+    Scenic::Adapters::Postgres.new.create_materialized_view(name, sql)
+    path = Scenic::Definition.new(name, 1).full_path
+    FileUtils.mkpath(File.dirname(path))
+    File.write(path, sql)
+  end
+
   def generated_bases_migration
     definition = file('db/views/bases_v02.sql')
     expect(Pathname.new(definition)).to exist
@@ -26,6 +33,26 @@ RSpec.describe Scenic::Generators::View::CascadeGenerator, size: :medium, type: 
 
   def value_of(view)
     ActiveRecord::Base.connection.select_value("SELECT bar FROM #{view}")
+  end
+
+  def index_definitions_for(view)
+    schema, name = view.include?('.') ? view.split('.', 2) : ['public', view]
+    connection = ActiveRecord::Base.connection
+    connection.select_rows(<<~SQL)
+      SELECT indexname, indexdef FROM pg_indexes
+      WHERE schemaname = #{connection.quote(schema)} AND tablename = #{connection.quote(name)}
+      ORDER BY indexname
+    SQL
+  end
+
+  def expect_index_round_trip(migration, *views)
+    original = views.to_h { |view| [view, index_definitions_for(view)] }
+    expect(original.values).to all(be_present)
+    actual = %i[up down].map do |direction|
+      migration.migrate(direction)
+      views.to_h { |view| [view, index_definitions_for(view)] }
+    end
+    expect(actual).to eq([original, original])
   end
 
   def expect_bases_round_trip(dependent)
@@ -291,6 +318,13 @@ RSpec.describe Scenic::Generators::View::CascadeGenerator, size: :medium, type: 
       end
       expect(actual).to eq([%w[bar bar bar], %w[foo foo foo]])
     end
+
+    it 'preserves an index on a dependent materialized view in both directions' do
+      connection = ActiveRecord::Base.connection
+      connection.execute('CREATE UNIQUE INDEX zeta_bar_idx ON zeta (bar)')
+      connection.execute('CREATE INDEX zeta_lower_idx ON zeta (lower(bar)) WHERE bar IS NOT NULL')
+      expect_index_round_trip(migration_instance, 'zeta')
+    end
   end
 
   context 'when dependent views form a four-level chain' do
@@ -304,6 +338,24 @@ RSpec.describe Scenic::Generators::View::CascadeGenerator, size: :medium, type: 
 
     it 'updates and restores the deepest dependent view' do
       expect_bases_round_trip('v_d')
+    end
+  end
+
+  context 'when indexed materialized dependents form a chain' do
+    before do
+      create_view_with_definition('bases', "SELECT 'foo' AS bar")
+      create_materialized_view_with_definition('mid_reports', 'SELECT * FROM bases')
+      create_materialized_view_with_definition('leaf_reports', 'SELECT * FROM mid_reports')
+      connection = ActiveRecord::Base.connection
+      connection.execute('CREATE UNIQUE INDEX mid_reports_bar_idx ON mid_reports (bar)')
+      connection.execute('CREATE UNIQUE INDEX leaf_reports_bar_idx ON leaf_reports (bar)')
+      run_generator ['bases']
+    end
+
+    it 'preserves both indexes when applying and reversing the migration' do
+      expect_index_round_trip(generated_bases_migration, 'mid_reports', 'leaf_reports')
+    ensure
+      Object.send(:remove_const, :UpdateBasesToVersion2) if Object.const_defined?(:UpdateBasesToVersion2)
     end
   end
 
@@ -365,6 +417,8 @@ RSpec.describe Scenic::Generators::View::CascadeGenerator, size: :medium, type: 
       create_view_with_definition('app_bases', "SELECT 'foo' AS bar")
       create_view_with_definition('app_reports', 'SELECT * FROM app_bases')
       create_view_with_definition('legacy_reports', 'SELECT * FROM app_bases')
+      Scenic::Adapters::Postgres.new.create_materialized_view('app_metrics', 'SELECT * FROM app_bases')
+      File.write(Scenic::Definition.new('app_metrics', 1).full_path, 'SELECT * FROM app_bases')
       run_generator ['bases']
     end
 
@@ -388,6 +442,13 @@ RSpec.describe Scenic::Generators::View::CascadeGenerator, size: :medium, type: 
     it 'updates and restores the unprefixed dependent view' do
       expect_bases_round_trip('legacy_reports')
     end
+
+    it 'preserves an index on a prefixed materialized dependent' do
+      ActiveRecord::Base.connection.execute('CREATE UNIQUE INDEX app_metrics_bar_idx ON app_metrics (bar)')
+      expect_index_round_trip(generated_bases_migration, 'app_metrics')
+    ensure
+      Object.send(:remove_const, :UpdateBasesToVersion2) if Object.const_defined?(:UpdateBasesToVersion2)
+    end
   end
 
   context 'when a schema-qualified view has dependents across schemas' do
@@ -410,6 +471,10 @@ RSpec.describe Scenic::Generators::View::CascadeGenerator, size: :medium, type: 
       create_view_with_definition('schema_reports', 'SELECT * FROM schema_bases')
       create_view_with_definition('reporting.schema_bases', "SELECT 'foo' AS bar")
       create_view_with_definition('reporting.schema_reports', 'SELECT * FROM reporting.schema_bases')
+      Scenic::Adapters::Postgres.new.create_materialized_view(
+        'reporting.schema_metrics', 'SELECT * FROM reporting.schema_bases'
+      )
+      File.write(file('db/views/reporting_schema_metrics_v01.sql'), 'SELECT * FROM reporting.schema_bases')
       create_view_with_definition('cross_reports', 'SELECT * FROM reporting.schema_reports')
       run_generator ['reporting.schema_bases']
     end
@@ -434,6 +499,13 @@ RSpec.describe Scenic::Generators::View::CascadeGenerator, size: :medium, type: 
 
     it 'updates and restores dependents in both schemas' do
       expect(round_trip_values).to eq([%w[bar bar public], %w[foo foo public]])
+    end
+
+    it 'preserves an index on a schema-qualified materialized dependent' do
+      ActiveRecord::Base.connection.execute(
+        'CREATE UNIQUE INDEX schema_metrics_bar_idx ON reporting.schema_metrics (bar)'
+      )
+      expect_index_round_trip(migration_instance, 'reporting.schema_metrics')
     end
   end
 

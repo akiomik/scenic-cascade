@@ -75,22 +75,7 @@ $ bin/rails generate scenic:view:cascade first_results
 ```
 
 Since all dependencies are described, you can execute `bin/rails db:migrate` without changing the migration file.
-
-> [!WARNING]
-> Currently, index re-creation is not supported.
-> Please change a migration file to recreate indexes if it contains `drop_view` for materialized views.
-
-```ruby
-class UpdateSearchResultsToVersion2 < ActiveRecord::Migration
-  def change
-    drop_view :third_results, revert_to_version: 2, materialized: false
-    drop_view :second_results, revert_to_version: 3, materialized: true
-    replace_view :first_results, version: 2, revert_to_version: 1
-    create_view :second_results, version: 3, materialized: true
-    create_view :third_results, version: 2, materialized: false
-  end
-end
-```
+The migration drops `third_results` and `second_results`, updates `first_results`, then recreates the dependents in the opposite order. It captures indexes on `second_results` immediately before dropping it and recreates them after the materialized view is restored. The same happens when the migration is reversed.
 
 ## Development
 
