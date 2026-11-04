@@ -15,7 +15,7 @@ gem 'steep', '~> 2.1', require: false
 gem 'activerecord', '~> 7.2.0'
 gem 'ammeter', '~> 1.1'
 gem 'database_cleaner-active_record', '~> 2.0'
-gem 'nokogiri', '~> 1.18.0'
+gem 'nokogiri', '~> 1.19.5'
 gem 'pg', '~> 1.0'
 gem 'railties', '~> 7.2.0'
 gem 'rspec', '~> 3.0'
