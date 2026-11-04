@@ -23,9 +23,7 @@ Gem::Specification.new do |spec|
   # Package only runtime code, type signatures, and user-facing documentation.
   documentation_files = %w[CHANGELOG.md LICENSE README.md]
   spec.files = Dir.chdir(File.expand_path(__dir__)) do
-    `git ls-files -z`.split("\x0").select do |file|
-      file.start_with?('lib/', 'sig/') || documentation_files.include?(file)
-    end
+    (Dir.glob('{lib,sig}/**/*').select { |file| File.file?(file) } + documentation_files).sort
   end
   spec.bindir = 'exe'
   spec.executables = spec.files.grep(%r{\Aexe/}) { |f| File.basename(f) }

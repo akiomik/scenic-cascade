@@ -7,6 +7,10 @@ and this project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.ht
 
 ## [Unreleased]
 
+### Fixed
+
+- Include runtime code and type signatures when building the gem from a source archive without Git metadata.
+
 ## [0.3.0] - 2026-11-05
 
 ### Changed
