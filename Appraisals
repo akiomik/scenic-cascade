@@ -17,6 +17,10 @@ appraise 'rails-8-1' do
   gem 'railties', '>= 8.1.4.1', '< 8.2'
 end
 
+appraise 'scenic-1-6' do
+  gem 'scenic', '= 1.6.0'
+end
+
 appraise 'scenic-1-8' do
   gem 'scenic', '~> 1.8.0'
 end

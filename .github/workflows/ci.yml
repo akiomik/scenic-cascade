@@ -46,6 +46,7 @@ jobs:
           - { ruby: '3.3', rails: '8.1', gemfile: 'gemfiles/rails_8_1.gemfile' }
           - { ruby: '3.4', rails: '8.1', gemfile: 'gemfiles/rails_8_1.gemfile' }
           - { ruby: '3.4', rails: '7.2', scenic: '1.8', gemfile: 'gemfiles/scenic_1_8.gemfile' }
+          - { ruby: '3.4', rails: '7.2', scenic: '1.6.0', gemfile: 'gemfiles/scenic_1_6.gemfile' }
           - { ruby: '4.0', rails: '8.1', gemfile: 'gemfiles/rails_8_1.gemfile' }
           - { ruby: '3.4', rails: '7.2', postgres: '17', label: 'Ruby 3.4 / PostgreSQL 17', gemfile: 'Gemfile' }
 
