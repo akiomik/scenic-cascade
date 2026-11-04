@@ -7,6 +7,8 @@ and this project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.ht
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-11-04
+
 ### Changed
 
 - Require Ruby 3.3 or newer while continuing to test Rails 7.1 and 7.2; use v0.1.5 on older Ruby versions.
@@ -58,7 +60,8 @@ and this project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.ht
 
 - Initial release of the cascading Scenic view migration generator.
 
-[Unreleased]: https://github.com/akiomik/scenic-cascade/compare/v0.1.5...HEAD
+[Unreleased]: https://github.com/akiomik/scenic-cascade/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/akiomik/scenic-cascade/compare/v0.1.5...v0.2.0
 [0.1.5]: https://github.com/akiomik/scenic-cascade/compare/v0.1.4...v0.1.5
 [0.1.4]: https://github.com/akiomik/scenic-cascade/compare/v0.1.3...v0.1.4
 [0.1.3]: https://github.com/akiomik/scenic-cascade/compare/v0.1.2...v0.1.3
