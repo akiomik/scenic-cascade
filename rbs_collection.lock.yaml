@@ -166,7 +166,7 @@ gems:
   source:
     type: stdlib
 - name: prism
-  version: 2.1.0
+  version: 1.9.0
   source:
     type: rubygems
 - name: pstore
