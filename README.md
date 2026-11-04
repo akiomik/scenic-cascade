@@ -92,7 +92,7 @@ end
 
 After checking out the repo, run `bin/setup` to install dependencies. Then, run `bundle exec rake spec` to run the tests. You can also run `bin/console` for an interactive prompt that will allow you to experiment.
 
-The default bundle tests Rails 7.2. To test another supported version, run `bundle exec appraisal install` followed by `bundle exec appraisal rails-7-1 rspec` or `bundle exec appraisal rails-8-0 rspec`.
+The default bundle tests Rails 7.2. To test another supported version, run `bundle exec appraisal install` followed by `bundle exec appraisal rails-7-1 rspec`, `bundle exec appraisal rails-8-0 rspec`, or `bundle exec appraisal rails-8-1 rspec`.
 
 To install this gem onto your local machine, run `bundle exec rake install`. To release a new version, update `version.rb`, `Gemfile.lock`, and `CHANGELOG.md`, then publish a GitHub Release with a matching `vX.Y.Z` tag. The [publish workflow](.github/workflows/publish.yml) builds and pushes the gem to [rubygems.org](https://rubygems.org).
 

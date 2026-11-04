@@ -11,3 +11,10 @@ appraise 'rails-8-0' do
   gem 'nokogiri', '~> 1.19.5'
   gem 'railties', '>= 8.0.5.2', '< 8.1'
 end
+
+appraise 'rails-8-1' do
+  gem 'activerecord', '>= 8.1.4.1', '< 8.2'
+  # Keep Rails 7 on Nokogiri 1.18 for Ruby 3.1, but use the patched Rails 8 dependency floor here.
+  gem 'nokogiri', '~> 1.19.5'
+  gem 'railties', '>= 8.1.4.1', '< 8.2'
+end

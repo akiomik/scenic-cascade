@@ -45,6 +45,8 @@ jobs:
           - { ruby: '3.4', rails: '7.2', gemfile: 'Gemfile' }
           - { ruby: '3.2', rails: '8.0', gemfile: 'gemfiles/rails_8_0.gemfile' }
           - { ruby: '3.4', rails: '8.0', gemfile: 'gemfiles/rails_8_0.gemfile' }
+          - { ruby: '3.2', rails: '8.1', gemfile: 'gemfiles/rails_8_1.gemfile' }
+          - { ruby: '3.4', rails: '8.1', gemfile: 'gemfiles/rails_8_1.gemfile' }
 
     services:
       postgres:
