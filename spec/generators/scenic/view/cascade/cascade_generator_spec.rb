@@ -18,7 +18,7 @@ RSpec.describe Scenic::Generators::View::CascadeGenerator, size: :medium, type: 
 
   def generated_bases_migration
     definition = file('db/views/bases_v02.sql')
-    expect(definition).to exist
+    expect(Pathname.new(definition)).to exist
     File.write(definition, "SELECT 'bar' AS bar")
     load Dir.glob(file('db/migrate/*_update_bases_to_version_2.rb')).fetch(0)
     UpdateBasesToVersion2.new
@@ -51,7 +51,7 @@ RSpec.describe Scenic::Generators::View::CascadeGenerator, size: :medium, type: 
     before { run_generator [view_name] }
 
     it { expect(migration).to be_a_migration }
-    it { expect(view_definition).to exist }
+    it { expect(Pathname.new(view_definition)).to exist }
   end
 
   context 'when updating an existing view' do
@@ -66,7 +66,7 @@ RSpec.describe Scenic::Generators::View::CascadeGenerator, size: :medium, type: 
     end
 
     it { expect(migration).to be_a_migration }
-    it { expect(view_definition).to exist }
+    it { expect(Pathname.new(view_definition)).to exist }
 
     it 'uses update_view by default' do
       expect(migration).to contain_migration(:update_view, ':search_results', version: 2, revert_to_version: 1)
@@ -233,7 +233,7 @@ RSpec.describe Scenic::Generators::View::CascadeGenerator, size: :medium, type: 
     end
 
     it { expect(migration).to be_a_migration }
-    it { expect(view_definition).to exist }
+    it { expect(Pathname.new(view_definition)).to exist }
 
     it 'drops alpha before updating firsts' do
       expect(migration).to contain_migration(
@@ -319,7 +319,7 @@ RSpec.describe Scenic::Generators::View::CascadeGenerator, size: :medium, type: 
     end
 
     it 'creates the initial definition' do
-      expect(file('db/views/bases_v01.sql')).to exist
+      expect(Pathname.new(file('db/views/bases_v01.sql'))).to exist
     end
 
     it 'creates an initial migration' do
@@ -622,12 +622,12 @@ RSpec.describe Scenic::Generators::View::CascadeGenerator, size: :medium, type: 
 
       it 'removes the new definition' do
         collision_error
-        expect(file('db/views/bases_v02.sql')).not_to exist
+        expect(Pathname.new(file('db/views/bases_v02.sql'))).not_to exist
       end
 
       it 'does not leave another migration' do
         collision_error
-        expect(Dir.glob(file('db/migrate/*_update_bases_to_version_2.rb'))).to eq([existing_migration])
+        expect(Dir.glob(file('db/migrate/*_update_bases_to_version_2.rb'))).to eq([existing_migration.to_s])
       end
     end
 
@@ -673,12 +673,12 @@ RSpec.describe Scenic::Generators::View::CascadeGenerator, size: :medium, type: 
 
       it 'removes the new definition' do
         template_error
-        expect(file('db/views/bases_v02.sql')).not_to exist
+        expect(Pathname.new(file('db/views/bases_v02.sql'))).not_to exist
       end
 
       it 'removes only the partial migration' do
         template_error
-        expect(Dir.glob(file('db/migrate/*_update_bases_to_version_2.rb'))).to eq([existing_migration])
+        expect(Dir.glob(file('db/migrate/*_update_bases_to_version_2.rb'))).to eq([existing_migration.to_s])
       end
 
       it 'preserves the existing migration content' do
@@ -700,7 +700,7 @@ RSpec.describe Scenic::Generators::View::CascadeGenerator, size: :medium, type: 
     end
 
     it 'does not leave a new definition' do
-      expect(file('db/views/bases_v02.sql')).not_to exist
+      expect(Pathname.new(file('db/views/bases_v02.sql'))).not_to exist
     end
 
     it 'preserves the existing migration' do
@@ -708,7 +708,7 @@ RSpec.describe Scenic::Generators::View::CascadeGenerator, size: :medium, type: 
     end
 
     it 'does not create another migration' do
-      expect(Dir.glob(file('db/migrate/*_update_bases_to_version_2.rb'))).to eq([existing_migration])
+      expect(Dir.glob(file('db/migrate/*_update_bases_to_version_2.rb'))).to eq([existing_migration.to_s])
     end
 
     context 'when retried after the collision is removed' do
@@ -738,7 +738,7 @@ RSpec.describe Scenic::Generators::View::CascadeGenerator, size: :medium, type: 
     end
 
     it 'creates the next definition' do
-      expect(file('db/views/bases_v02.sql')).to exist
+      expect(Pathname.new(file('db/views/bases_v02.sql'))).to exist
     end
 
     it 'creates a matching migration' do
@@ -759,7 +759,7 @@ RSpec.describe Scenic::Generators::View::CascadeGenerator, size: :medium, type: 
     end
 
     it 'restores the definition referenced by the existing migration' do
-      expect(file('db/views/bases_v02.sql')).to exist
+      expect(Pathname.new(file('db/views/bases_v02.sql'))).to exist
     end
 
     it 'retains the existing migration' do
@@ -803,11 +803,11 @@ RSpec.describe Scenic::Generators::View::CascadeGenerator, size: :medium, type: 
     end
 
     it 'removes the version two definition' do
-      expect(file('db/views/bases_v02.sql')).not_to exist
+      expect(Pathname.new(file('db/views/bases_v02.sql'))).not_to exist
     end
 
     it 'removes the version two migration' do
-      expect(migration).not_to exist
+      expect(Pathname.new(migration)).not_to exist
     end
   end
 
