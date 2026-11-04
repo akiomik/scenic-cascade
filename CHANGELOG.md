@@ -7,6 +7,10 @@ and this project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.ht
 
 ## [Unreleased]
 
+### Added
+
+- Verified compatibility with Ruby 4.0 on Rails 8.1.
+
 ### Fixed
 
 - Reject `--side-by-side` on Scenic 1.8 when updating a materialized view, before writing a migration.

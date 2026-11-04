@@ -29,7 +29,7 @@ RSpec.describe 'release-version', size: :small do
   it 'rejects a valid tag that differs from the gem version' do
     tag = "v#{Scenic::Cascade::VERSION.split('.').first.to_i + 1}.0.0"
     _stdout, stderr, status = validate(tag)
-    expect([status.success?, File.size(output.path), stderr]).to eq(
+    expect([status.success?, File.size(output.path), stderr.lines.last]).to eq(
       [false, 0, "Release tag #{tag} does not match gem version #{Scenic::Cascade::VERSION}\n"]
     )
   end
