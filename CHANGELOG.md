@@ -7,6 +7,10 @@ and this project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.ht
 
 ## [Unreleased]
 
+### Fixed
+
+- Preserve comments and expression statistics on dependent materialized-view indexes during cascade migrations.
+
 ## [0.4.0] - 2026-11-05
 
 ### Fixed
