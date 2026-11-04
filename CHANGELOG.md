@@ -7,6 +7,12 @@ and this project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.ht
 
 ## [Unreleased]
 
+## [0.1.4] - 2026-11-04
+
+### Added
+
+- Verified compatibility with Rails 8.0 and 8.1 while retaining Rails 7.1 and 7.2 coverage.
+
 ## [0.1.3] - 2026-11-01
 
 ### Fixed
@@ -37,7 +43,8 @@ and this project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.ht
 
 - Initial release of the cascading Scenic view migration generator.
 
-[Unreleased]: https://github.com/akiomik/scenic-cascade/compare/v0.1.3...HEAD
+[Unreleased]: https://github.com/akiomik/scenic-cascade/compare/v0.1.4...HEAD
+[0.1.4]: https://github.com/akiomik/scenic-cascade/compare/v0.1.3...v0.1.4
 [0.1.3]: https://github.com/akiomik/scenic-cascade/compare/v0.1.2...v0.1.3
 [0.1.2]: https://github.com/akiomik/scenic-cascade/compare/v0.1.1...v0.1.2
 [0.1.1]: https://github.com/akiomik/scenic-cascade/compare/v0.1.0...v0.1.1
