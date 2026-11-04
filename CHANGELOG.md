@@ -7,6 +7,10 @@ and this project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.ht
 
 ## [Unreleased]
 
+### Changed
+
+- Require Scenic 1.6 or newer within the 1.x series; older releases cannot complete all generated migrations on supported Ruby and Rails versions.
+
 ## [0.2.0] - 2026-11-04
 
 ### Changed

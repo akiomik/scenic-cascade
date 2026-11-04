@@ -17,6 +17,10 @@ module Scenic
           class_option :side_by_side, type: :boolean, default: false, aliases: ['--side-by-side']
         end
 
+        if Gem::Version.new(Scenic::VERSION) < Gem::Version.new('1.7')
+          class_option :replace, type: :boolean, default: false
+        end
+
         def create_view_definition
           @definition_path = @original_definition = nil
           validate_update_options! unless destroying? || creating_new_view?
