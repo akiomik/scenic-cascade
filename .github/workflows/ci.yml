@@ -28,7 +28,7 @@ jobs:
 
   build:
     runs-on: ubuntu-latest
-    name: Ruby ${{ matrix.ruby }} / Rails ${{ matrix.rails }}
+    name: ${{ matrix.gemfile == 'Gemfile' && format('Ruby {0}', matrix.ruby) || format('Ruby {0} / Rails {1}', matrix.ruby, matrix.rails) }}
     env:
       BUNDLE_GEMFILE: ${{ github.workspace }}/${{ matrix.gemfile }}
     permissions:
