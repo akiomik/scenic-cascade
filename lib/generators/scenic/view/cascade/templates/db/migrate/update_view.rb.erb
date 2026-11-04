@@ -79,16 +79,35 @@ class <%= migration_class_name %> < <%= activerecord_migration_class %>
 
   def capture_dependent_indexes(name)
     @dependent_indexes ||= {}
-    @dependent_indexes[name] = connection.select_values(<<~SQL)
-      SELECT pg_get_indexdef(indexrelid)
-      FROM pg_index
-      WHERE indrelid = to_regclass(#{connection.quote(name)})
-      ORDER BY indexrelid
+    @dependent_indexes[name] = connection.select_all(<<~SQL).to_a
+      SELECT pg_get_indexdef(i.indexrelid) AS definition,
+             format('%I.%I', ns.nspname, idx.relname) AS index_name,
+             obj_description(i.indexrelid, 'pg_class') AS comment,
+             attr.attnum AS statistics_column,
+             attr.attstattarget AS statistics_target
+      FROM pg_index AS i
+      JOIN pg_class AS idx ON idx.oid = i.indexrelid
+      JOIN pg_namespace AS ns ON ns.oid = idx.relnamespace
+      LEFT JOIN pg_attribute AS attr
+        ON attr.attrelid = i.indexrelid AND attr.attnum > 0 AND attr.attstattarget >= 0
+      WHERE i.indrelid = to_regclass(#{connection.quote(name)})
+      ORDER BY i.indexrelid, attr.attnum
     SQL
   end
 
   def restore_dependent_indexes(name)
-    @dependent_indexes.fetch(name).each { |definition| execute(definition) }
+    @dependent_indexes.fetch(name).group_by { |row| row.fetch('index_name') }.each do |index_name, rows|
+      execute(rows.first.fetch('definition'))
+      rows.each do |row|
+        next unless row['statistics_column']
+
+        execute("ALTER INDEX #{index_name} ALTER COLUMN #{Integer(row.fetch('statistics_column'))} " \
+                "SET STATISTICS #{Integer(row.fetch('statistics_target'))}")
+      end
+
+      comment = rows.first['comment']
+      execute("COMMENT ON INDEX #{index_name} IS #{connection.quote(comment)}") unless comment.nil?
+    end
   end
   <%- end -%>
 end

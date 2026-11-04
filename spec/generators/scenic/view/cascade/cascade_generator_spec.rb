@@ -45,6 +45,24 @@ RSpec.describe Scenic::Generators::View::CascadeGenerator, size: :medium, type: 
     SQL
   end
 
+  def index_metadata_for(index)
+    connection = ActiveRecord::Base.connection
+    connection.select_rows(<<~SQL).first
+      SELECT obj_description(#{connection.quote(index)}::regclass, 'pg_class'), attstattarget
+      FROM pg_attribute
+      WHERE attrelid = #{connection.quote(index)}::regclass AND attnum = 1
+    SQL
+  end
+
+  def expect_index_metadata_round_trip(migration, index)
+    original = index_metadata_for(index)
+    actual = %i[up down].map do |direction|
+      migration.migrate(direction)
+      index_metadata_for(index)
+    end
+    expect(actual).to eq([original, original])
+  end
+
   def expect_index_round_trip(migration, *views)
     original = views.to_h { |view| [view, index_definitions_for(view)] }
     expect(original.values).to all(be_present)
@@ -324,6 +342,14 @@ RSpec.describe Scenic::Generators::View::CascadeGenerator, size: :medium, type: 
       connection.execute('CREATE UNIQUE INDEX zeta_bar_idx ON zeta (bar)')
       connection.execute('CREATE INDEX zeta_lower_idx ON zeta (lower(bar)) WHERE bar IS NOT NULL')
       expect_index_round_trip(migration_instance, 'zeta')
+    end
+
+    it 'preserves index comments and expression statistics in both directions' do
+      connection = ActiveRecord::Base.connection
+      connection.execute('CREATE INDEX zeta_lower_idx ON zeta (lower(bar))')
+      connection.execute("COMMENT ON INDEX zeta_lower_idx IS 'search hint'")
+      connection.execute('ALTER INDEX zeta_lower_idx ALTER COLUMN 1 SET STATISTICS 123')
+      expect_index_metadata_round_trip(migration_instance, 'zeta_lower_idx')
     end
   end
 
