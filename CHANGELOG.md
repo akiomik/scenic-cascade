@@ -7,6 +7,10 @@ and this project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.ht
 
 ## [Unreleased]
 
+### Changed
+
+- Require Ruby 3.3 or newer while continuing to test Rails 7.1 and 7.2; use v0.1.5 on older Ruby versions.
+
 ## [0.1.5] - 2026-11-04
 
 ### Added
