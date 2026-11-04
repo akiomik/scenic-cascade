@@ -9,14 +9,12 @@ gem 'appraisal', '~> 2.5', require: false
 gem 'rake', '~> 13.0'
 
 # type checking
-# Steep 2.x drops Ruby 3.1, which remains in the CI matrix.
 gem 'steep', '~> 1.10', require: false
 
 # testing
 gem 'activerecord', '~> 7.2.0'
 gem 'ammeter', '~> 1.1'
 gem 'database_cleaner-active_record', '~> 2.0'
-# Nokogiri 1.19 drops Ruby 3.1, which remains in the CI matrix.
 gem 'nokogiri', '~> 1.18.0'
 gem 'pg', '~> 1.0'
 gem 'railties', '~> 7.2.0'

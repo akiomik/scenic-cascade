@@ -9,7 +9,7 @@ module Scenic
       attr_reader :version, :database_name
 
       def initialize(name:, version:, materialized:, database_name: name)
-        super(name: name, materialized: materialized)
+        super(name:, materialized:)
 
         raise TypeError unless version.is_a?(Integer)
         raise TypeError unless database_name.is_a?(String)
