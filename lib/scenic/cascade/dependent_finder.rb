@@ -41,19 +41,29 @@ module Scenic
         private_constant :DEPENDANT_SQL
 
         def view_dependents_of(view_name, recursive: false)
-          query = ActiveRecord::Base.sanitize_sql_array([DEPENDANT_SQL, view_name])
-          raw_dependencies = ActiveRecord::Base.connection.select_all(query).to_a
+          # @type var queries: Hash[String, Array[Hash[String, untyped]]]
+          queries = {}
+          view_dependents_of_with_cache(view_name, recursive, queries)
+        end
+
+        alias view_dependants_of view_dependents_of
+
+        private
+
+        def view_dependents_of_with_cache(view_name, recursive, queries)
+          raw_dependencies = queries.fetch(view_name) do
+            query = ActiveRecord::Base.sanitize_sql_array([DEPENDANT_SQL, view_name])
+            queries[view_name] = ActiveRecord::Base.connection.select_all(query).to_a
+          end
           dependencies = raw_dependencies.map { |dep| Scenic::Cascade::Dependency.from_hash(dep) }
 
           return [] if dependencies.empty?
           return dependencies unless recursive
 
           raw_dependencies.zip(dependencies).flat_map do |row, dependency|
-            [dependency, *view_dependents_of(row.fetch('from_lookup'), recursive: true)]
+            [dependency, *view_dependents_of_with_cache(row.fetch('from_lookup'), true, queries)]
           end
         end
-
-        alias view_dependants_of view_dependents_of
       end
     end
   end

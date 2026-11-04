@@ -7,6 +7,10 @@ and this project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.ht
 
 ## [Unreleased]
 
+### Changed
+
+- Avoid repeated database queries and definition-file lookups when view dependencies converge.
+
 ### Fixed
 
 - Preserve comments and expression statistics on dependent materialized-view indexes during cascade migrations.

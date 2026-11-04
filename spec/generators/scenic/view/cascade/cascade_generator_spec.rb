@@ -367,6 +367,24 @@ RSpec.describe Scenic::Generators::View::CascadeGenerator, size: :medium, type: 
     end
   end
 
+  context 'when dependent views converge' do
+    before do
+      create_view_with_definition('perf_bases', "SELECT 'foo' AS bar")
+      create_view_with_definition('perf_lefts', 'SELECT * FROM perf_bases')
+      create_view_with_definition('perf_rights', 'SELECT * FROM perf_bases')
+      create_view_with_definition('perf_joins', 'SELECT * FROM perf_lefts UNION SELECT * FROM perf_rights')
+      create_view_with_definition('perf_leaves', 'SELECT * FROM perf_joins')
+    end
+
+    it 'resolves a converging dependent definition once' do
+      allow(Scenic::Cascade).to receive(:find_definitions_of).and_call_original
+
+      run_generator ['perf_bases']
+
+      expect(Scenic::Cascade).to have_received(:find_definitions_of).with('perf_joins').twice
+    end
+  end
+
   context 'when indexed materialized dependents form a chain' do
     before do
       create_view_with_definition('bases', "SELECT 'foo' AS bar")

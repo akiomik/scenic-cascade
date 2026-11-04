@@ -35,6 +35,32 @@ RSpec.describe Scenic::Cascade::DependentFinder, size: :medium do
         expect(names).to eq(['schema_reports'])
       end
     end
+
+    context 'when dependencies converge' do
+      before do
+        adapter = Scenic::Adapters::Postgres.new
+        adapter.create_view('perf_root', "SELECT 'value' AS bar")
+        adapter.create_view('perf_left', 'SELECT * FROM perf_root')
+        adapter.create_view('perf_right', 'SELECT * FROM perf_root')
+        adapter.create_view('perf_join', 'SELECT * FROM perf_left UNION SELECT * FROM perf_right')
+        adapter.create_view('perf_leaf', 'SELECT * FROM perf_join')
+      end
+
+      it 'retains all dependency paths' do
+        result = Scenic::Cascade.view_dependents_of('perf_root', recursive: true)
+
+        expect(result.count { |dep| dep.from.name == 'perf_leaf' }).to eq(2)
+      end
+
+      it 'queries each view once' do
+        connection = ActiveRecord::Base.connection
+        allow(connection).to receive(:select_all).and_call_original
+
+        Scenic::Cascade.view_dependents_of('perf_root', recursive: true)
+
+        expect(connection).to have_received(:select_all).exactly(5).times
+      end
+    end
   end
 
   describe '.view_dependants_of' do
