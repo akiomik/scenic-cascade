@@ -7,6 +7,10 @@ and this project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.ht
 
 ## [Unreleased]
 
+### Fixed
+
+- Preserve index names and definitions on dependent materialized views when applying or reversing cascade migrations.
+
 ## [0.3.1] - 2026-11-05
 
 ### Fixed

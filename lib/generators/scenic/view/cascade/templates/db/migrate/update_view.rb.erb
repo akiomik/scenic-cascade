@@ -15,6 +15,12 @@ class <%= migration_class_name %> < <%= activerecord_migration_class %>
   <%- materialized_options = materialized_flags.empty? ? 'true' : "{ #{materialized_flags.join(', ')} }" -%>
   def change
   <%- dependents.reverse_each do |dep| -%>
+  <%- if dep.materialized? -%>
+    reversible do |direction|
+      direction.up { capture_dependent_indexes(<%= dep.database_name.inspect %>) }
+      direction.down { restore_dependent_indexes(<%= dep.database_name.inspect %>) }
+    end
+  <%- end -%>
   <%- if dep.database_name == dep.name -%>
     drop_view ExactViewName.new(<%= dep.database_name.inspect %>),
               revert_to_version: <%= dep.version %>,
@@ -59,6 +65,30 @@ class <%= migration_class_name %> < <%= activerecord_migration_class %>
       end
     end
   <%- end -%>
+  <%- if dep.materialized? -%>
+    reversible do |direction|
+      direction.up { restore_dependent_indexes(<%= dep.database_name.inspect %>) }
+      direction.down { capture_dependent_indexes(<%= dep.database_name.inspect %>) }
+    end
+  <%- end -%>
   <%- end -%>
   end
+
+  <%- if dependents.any?(&:materialized?) -%>
+  private
+
+  def capture_dependent_indexes(name)
+    @dependent_indexes ||= {}
+    @dependent_indexes[name] = connection.select_values(<<~SQL)
+      SELECT pg_get_indexdef(indexrelid)
+      FROM pg_index
+      WHERE indrelid = to_regclass(#{connection.quote(name)})
+      ORDER BY indexrelid
+    SQL
+  end
+
+  def restore_dependent_indexes(name)
+    @dependent_indexes.fetch(name).each { |definition| execute(definition) }
+  end
+  <%- end -%>
 end
