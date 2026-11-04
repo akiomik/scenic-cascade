@@ -6,6 +6,8 @@ appraise 'rails-7-1' do
 end
 
 appraise 'rails-8-0' do
-  gem 'activerecord', '~> 8.0.0'
-  gem 'railties', '~> 8.0.0'
+  gem 'activerecord', '>= 8.0.5.2', '< 8.1'
+  # Keep the root bundle compatible with Ruby 3.1; the patched Rails 8 stack needs newer Nokogiri.
+  gem 'nokogiri', '~> 1.19.5'
+  gem 'railties', '>= 8.0.5.2', '< 8.1'
 end
