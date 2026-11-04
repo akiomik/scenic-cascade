@@ -1,0 +1,3 @@
+module Scenic
+  VERSION: String
+end

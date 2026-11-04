@@ -97,7 +97,8 @@ RSpec.describe Scenic::Generators::View::CascadeGenerator, size: :medium, type: 
     end
   end
 
-  context 'when updating a materialized view side by side' do
+  context 'when updating a materialized view side by side',
+          if: Gem::Version.new(Scenic::VERSION) >= Gem::Version.new('1.9') do
     let(:migration) { file('db/migrate/update_bases_to_version_2.rb') }
     let(:migration_sql) { File.read(Dir.glob(file('db/migrate/*_update_bases_to_version_2.rb')).fetch(0)) }
 
@@ -155,6 +156,28 @@ RSpec.describe Scenic::Generators::View::CascadeGenerator, size: :medium, type: 
         run_generator ['bases', '--side-by-side']
       rescue ArgumentError => e
         raise unless e.message.include?('requires --materialized')
+      end.not_to(change { Dir.glob(file('db/{views,migrate}/*')) })
+    end
+  end
+
+  context 'when Scenic does not support side-by-side updates' do
+    before do
+      Scenic::Adapters::Postgres.new.create_materialized_view('bases', "SELECT 'foo' AS bar")
+      FileUtils.mkpath(file('db/views'))
+      File.write(file('db/views/bases_v01.sql'), "SELECT 'foo' AS bar")
+      stub_const('Scenic::VERSION', '1.8.0')
+    end
+
+    it 'rejects the option' do
+      expect { run_generator ['bases', '--materialized', '--side-by-side'] }
+        .to raise_error(ArgumentError, /requires Scenic 1\.9 or newer/)
+    end
+
+    it 'does not leave generated files' do
+      expect do
+        run_generator ['bases', '--materialized', '--side-by-side']
+      rescue ArgumentError => e
+        raise unless e.message.include?('requires Scenic 1.9 or newer')
       end.not_to(change { Dir.glob(file('db/{views,migrate}/*')) })
     end
   end

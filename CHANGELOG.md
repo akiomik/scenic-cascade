@@ -7,6 +7,10 @@ and this project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.ht
 
 ## [Unreleased]
 
+### Fixed
+
+- Reject `--side-by-side` on Scenic 1.8 before writing a migration instead of silently ignoring it.
+
 ## [0.1.4] - 2026-11-04
 
 ### Added
