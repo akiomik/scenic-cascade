@@ -9,7 +9,7 @@ module Scenic
   module Generators
     module View
       # Create a database view migration with re-creating of dependent views
-      # rubocop:disable Metrics/ClassLength
+      # rubocop:disable-next Metrics/ClassLength
       class CascadeGenerator < Scenic::Generators::ViewGenerator
         source_root File.expand_path('templates', __dir__ || '.')
 
@@ -153,7 +153,6 @@ module Scenic
           "#{ActiveRecord::Base.table_name_prefix}#{plural_name}#{ActiveRecord::Base.table_name_suffix}"
         end
       end
-      # rubocop:enable Metrics/ClassLength
     end
   end
 end

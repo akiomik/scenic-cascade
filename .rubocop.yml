@@ -1,4 +1,4 @@
-require:
+plugins:
   - rubocop-performance
   - rubocop-rake
   - rubocop-rspec
@@ -22,9 +22,20 @@ Style/StringLiteralsInInterpolation:
 Layout/LineLength:
   Max: 120
 
-RSpec/FilePath:
+RSpec/SpecFilePathFormat:
   Exclude:
     - spec/generators/**/*.rb
 
 RSpec/MultipleMemoizedHelpers:
   Max: 6
+
+# The finder examples intentionally share their caller's lets and hooks.
+RSpec/IncludeExamples:
+  Exclude:
+    - spec/scenic/cascade/dependency_finder_spec.rb
+    - spec/scenic/cascade/dependent_finder_spec.rb
+
+# Generator specs load migration classes from generated files and remove them after each example.
+RSpec/RemoveConst:
+  Exclude:
+    - spec/generators/scenic/view/cascade/cascade_generator_spec.rb

@@ -6,7 +6,7 @@ require 'tempfile'
 require_relative '../lib/scenic/cascade/version'
 
 # The executable has no Ruby class to describe.
-# rubocop:disable RSpec/DescribeClass
+# rubocop:disable-next RSpec/DescribeClass
 RSpec.describe 'release-version', size: :small do
   let(:script) { File.expand_path('../bin/release-version', __dir__) }
   let(:output) { Tempfile.new('release-version') }
@@ -46,4 +46,3 @@ RSpec.describe 'release-version', size: :small do
     expect([status.success?, File.exist?(marker)]).to eq([false, false])
   end
 end
-# rubocop:enable RSpec/DescribeClass
