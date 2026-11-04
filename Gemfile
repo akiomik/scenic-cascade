@@ -9,7 +9,7 @@ gem 'appraisal', '~> 2.5', require: false
 gem 'rake', '~> 13.0'
 
 # type checking
-gem 'steep', '~> 1.10', require: false
+gem 'steep', '~> 2.1', require: false
 
 # testing
 gem 'activerecord', '~> 7.2.0'

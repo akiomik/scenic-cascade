@@ -122,9 +122,13 @@ gems:
   source:
     type: stdlib
 - name: logger
-  version: '0'
+  version: '1.7'
   source:
-    type: stdlib
+    type: git
+    name: ruby/gem_rbs_collection
+    revision: 9e17daa08b1710667699a208981cffd21dbf15f6
+    remote: https://github.com/ruby/gem_rbs_collection.git
+    repo_dir: gems
 - name: minitest
   version: '5.25'
   source:
@@ -166,9 +170,13 @@ gems:
   source:
     type: rubygems
 - name: pstore
-  version: '0'
+  version: '0.2'
   source:
-    type: stdlib
+    type: git
+    name: ruby/gem_rbs_collection
+    revision: 9e17daa08b1710667699a208981cffd21dbf15f6
+    remote: https://github.com/ruby/gem_rbs_collection.git
+    repo_dir: gems
 - name: psych
   version: '0'
   source:
@@ -221,6 +229,10 @@ gems:
     revision: 9e17daa08b1710667699a208981cffd21dbf15f6
     remote: https://github.com/ruby/gem_rbs_collection.git
     repo_dir: gems
+- name: random-formatter
+  version: '0'
+  source:
+    type: stdlib
 - name: rdoc
   version: '0'
   source:
@@ -258,6 +270,10 @@ gems:
   source:
     type: stdlib
 - name: timeout
+  version: '0'
+  source:
+    type: stdlib
+- name: tmpdir
   version: '0'
   source:
     type: stdlib
