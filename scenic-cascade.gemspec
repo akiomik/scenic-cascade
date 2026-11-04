@@ -20,12 +20,11 @@ Gem::Specification.new do |spec|
 
   spec.metadata['rubygems_mfa_required'] = 'true'
 
-  # Specify which files should be added to the gem when it is released.
-  # The `git ls-files -z` loads the files in the RubyGem that have been added into git.
+  # Package only runtime code, type signatures, and user-facing documentation.
+  documentation_files = %w[CHANGELOG.md LICENSE README.md]
   spec.files = Dir.chdir(File.expand_path(__dir__)) do
-    `git ls-files -z`.split("\x0").reject do |f|
-      (f == __FILE__) || (f == 'Appraisals') ||
-        f.match(%r{\A(?:(?:bin|test|spec|features|gemfiles)/|\.(?:git|travis|circleci)|appveyor)})
+    `git ls-files -z`.split("\x0").select do |file|
+      file.start_with?('lib/', 'sig/') || documentation_files.include?(file)
     end
   end
   spec.bindir = 'exe'
