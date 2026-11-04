@@ -7,6 +7,10 @@ and this project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.ht
 
 ## [Unreleased]
 
+### Fixed
+
+- Reject `--side-by-side` on Scenic 1.8 when updating a materialized view, before writing a migration.
+
 ## [0.1.4] - 2026-11-04
 
 ### Added

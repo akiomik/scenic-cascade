@@ -28,7 +28,7 @@ jobs:
 
   build:
     runs-on: ubuntu-latest
-    name: ${{ matrix.gemfile == 'Gemfile' && format('Ruby {0}', matrix.ruby) || format('Ruby {0} / Rails {1}', matrix.ruby, matrix.rails) }}
+    name: ${{ matrix.scenic && format('Ruby {0} / Rails {1} / Scenic {2}', matrix.ruby, matrix.rails, matrix.scenic) || matrix.gemfile == 'Gemfile' && format('Ruby {0}', matrix.ruby) || format('Ruby {0} / Rails {1}', matrix.ruby, matrix.rails) }}
     env:
       BUNDLE_GEMFILE: ${{ github.workspace }}/${{ matrix.gemfile }}
     permissions:
@@ -47,6 +47,7 @@ jobs:
           - { ruby: '3.4', rails: '8.0', gemfile: 'gemfiles/rails_8_0.gemfile' }
           - { ruby: '3.2', rails: '8.1', gemfile: 'gemfiles/rails_8_1.gemfile' }
           - { ruby: '3.4', rails: '8.1', gemfile: 'gemfiles/rails_8_1.gemfile' }
+          - { ruby: '3.4', rails: '7.2', scenic: '1.8', gemfile: 'gemfiles/scenic_1_8.gemfile' }
 
     services:
       postgres:

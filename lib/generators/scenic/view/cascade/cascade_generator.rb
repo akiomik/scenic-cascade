@@ -9,8 +9,13 @@ module Scenic
   module Generators
     module View
       # Create a database view migration with re-creating of dependent views
+      # rubocop:disable Metrics/ClassLength
       class CascadeGenerator < Scenic::Generators::ViewGenerator
         source_root File.expand_path('templates', __dir__ || '.')
+
+        if Gem::Version.new(Scenic::VERSION) < Gem::Version.new('1.9')
+          class_option :side_by_side, type: :boolean, default: false, aliases: ['--side-by-side']
+        end
 
         def create_view_definition
           @definition_path = @original_definition = nil
@@ -51,6 +56,9 @@ module Scenic
           raise ArgumentError, '--side-by-side cannot update schema-qualified views' if plural_name.include?('.')
 
           raise ArgumentError, '--side-by-side cannot be combined with --no-data' if options[:no_data]
+          return if Gem::Version.new(Scenic::VERSION) >= Gem::Version.new('1.9')
+
+          raise ArgumentError, '--side-by-side requires Scenic 1.9 or newer'
         end
 
         def migration_template_details
@@ -141,6 +149,7 @@ module Scenic
           "#{ActiveRecord::Base.table_name_prefix}#{plural_name}#{ActiveRecord::Base.table_name_suffix}"
         end
       end
+      # rubocop:enable Metrics/ClassLength
     end
   end
 end

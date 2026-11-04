@@ -2,6 +2,7 @@ module Scenic
   module Generators
     class ViewGenerator
       def self.source_root: (String?) -> void
+      def self.class_option: (Symbol, **untyped) -> untyped
       def migration_template: (String, String) -> void
       def destination_root: -> String
       def find_in_source_paths: (String) -> String
