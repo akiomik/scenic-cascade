@@ -10,6 +10,7 @@ and this project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.ht
 ### Added
 
 - Verified compatibility with Ruby 4.0 on Rails 8.1.
+- Verified compatibility with PostgreSQL 17 while retaining PostgreSQL 14 coverage.
 
 ### Fixed
 
