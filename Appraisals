@@ -7,13 +7,11 @@ end
 
 appraise 'rails-8-0' do
   gem 'activerecord', '>= 8.0.5.2', '< 8.1'
-  gem 'nokogiri', '~> 1.19.5'
   gem 'railties', '>= 8.0.5.2', '< 8.1'
 end
 
 appraise 'rails-8-1' do
   gem 'activerecord', '>= 8.1.4.1', '< 8.2'
-  gem 'nokogiri', '~> 1.19.5'
   gem 'railties', '>= 8.1.4.1', '< 8.2'
 end
 
