@@ -6,6 +6,10 @@ module Scenic
 
         def view_dependents_of: (String, ?recursive: bool) -> Array[Scenic::Cascade::Dependency]
         alias view_dependants_of view_dependents_of
+
+        private
+
+        def view_dependents_of_with_cache: (String, bool, Hash[String, Array[Hash[String, untyped]]]) -> Array[Scenic::Cascade::Dependency]
       end
     end
   end

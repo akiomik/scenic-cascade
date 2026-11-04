@@ -102,9 +102,9 @@ module Scenic
           return cached_dependents unless cached_dependents.nil?
 
           deps = Scenic::Cascade.view_dependents_of(database_view_name, recursive: true)
-          views = deps.map { |dep| view_with_version_for(dep) }
           # The last visit follows every prerequisite, even when names sort in the opposite order.
-          @dependents = views.reverse.uniq { |view| [view.name, view.version, view.materialized?] }.reverse
+          unique_deps = deps.reverse.uniq { |dep| [dep.from.name, dep.from.materialized?] }.reverse
+          @dependents = unique_deps.map { |dep| view_with_version_for(dep) }
         end
 
         def view_with_version_for(dep)
