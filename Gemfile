@@ -5,6 +5,7 @@ source 'https://rubygems.org'
 # Specify your gem's dependencies in scenic-cascade.gemspec
 gemspec
 
+gem 'appraisal', '~> 2.5', require: false
 gem 'rake', '~> 13.0'
 
 # type checking
